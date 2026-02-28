@@ -10,4 +10,4 @@ export const PLEINEN = [
 export type PleinSlug = (typeof PLEINEN)[number]["slug"];
 export type PleinItem = (typeof PLEINEN)[number];
 
-export const PLEIN_SLUGS = PLEINEN.map((p) => p.slug);
+export const PLEIN_SLUGS: string[] = PLEINEN.map((p) => p.slug);
