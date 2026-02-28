@@ -54,20 +54,7 @@ Klaar. Verdere policies hoef je nu niet aan te passen als je wilt beginnen.
 
 ---
 
-## Stap 4: (Optioneel) Google-inlog inschakelen
-
-Alleen als beheerders met **Google** moeten inloggen:
-
-1. In Supabase: **Authentication** → **Providers** → **Google**.
-2. Zet **Enable** aan.
-3. Vul **Client ID** en **Client Secret** in (haal je op in Google Cloud Console).
-4. Bij **Redirect URL** in Supabase moet staan:
-   - Live site: `https://jouwdomein.nl/auth/callback`
-   - Lokaal: `http://localhost:3000/auth/callback`
-
----
-
-## Stap 5: Eerste keer inloggen als hoofdadministrator
+## Stap 4: Eerste keer inloggen als hoofdadministrator
 
 1. Start je site lokaal (bijv. `npm run dev`) of open de live site.
 2. Ga naar de **hoofdpagina** en scroll helemaal naar beneden.
@@ -92,7 +79,6 @@ Alleen als beheerders met **Google** moeten inloggen:
 | 1 | In de projectmap: `npm install` |
 | 2 | Supabase → SQL Editor → script uit `001_admin_pleinen.sql` uitvoeren |
 | 3 | Supabase → Storage → buckets `plein-programmes` en `plein-images` (public) aanmaken |
-| 4 | (Optioneel) Supabase → Authentication → Google inschakelen |
-| 5 | Op de site: Beheerders login → account aanmaken met admin@cityeventsstadskanaal.nl → inloggen |
+| 4 | Op de site: Beheerders login → account aanmaken met admin@cityeventsstadskanaal.nl → inloggen |
 
 Daarna kun je pleinen beheren en rechten toewijzen.

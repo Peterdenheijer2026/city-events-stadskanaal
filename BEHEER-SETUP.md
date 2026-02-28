@@ -24,20 +24,12 @@ Bij **Policies** voor beide buckets (of via SQL):
 
 Voor een eenvoudige start: laat **Insert** toe voor `authenticated`; de app toont alleen het bewerkformulier voor pleinen waar de gebruiker rechten voor heeft.
 
-## 3. Google-inlog (optioneel)
-
-In **Supabase** → **Authentication** → **Providers** → **Google**: zet **Enable** aan.  
-Vul in wat Supabase vraagt (Client ID en Client Secret uit Google Cloud Console).  
-In **Redirect URLs** moet staan:  
-`https://<jouw-domein>/auth/callback`  
-(en voor lokaal: `http://localhost:3000/auth/callback`).
-
-## 4. Eerste inlog als hoofdadministrator
+## 3. Eerste inlog als hoofdadministrator
 
 1. Ga op de site naar **Beheerders login** (onderaan de hoofdpagina).
 2. Log in met **admin@cityeventsstadskanaal.nl** (maak eerst een account aan met “Account aanmaken” als dat nog niet bestaat).
 3. In het beheeroverzicht kun je bij **Pleinrechten toewijzen** per gebruiker aanvinken welke pleinen zij mogen beheren.
-4. Andere gebruikers kunnen een account aanmaken of inloggen met Google en zien daarna alleen de pleinen die jij voor hen hebt aangevinkt.
+4. Andere gebruikers kunnen een account aanmaken en zien daarna alleen de pleinen die jij voor hen hebt aangevinkt.
 
 ## Overzicht
 

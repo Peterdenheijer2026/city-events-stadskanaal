@@ -52,24 +52,6 @@ export default function LoginForm() {
     }
   }
 
-  async function handleGoogle() {
-    setLoading(true);
-    setMessage(null);
-    try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: { redirectTo: `${location.origin}/auth/callback?next=/beheer` },
-      });
-      if (error) throw error;
-    } catch (err: unknown) {
-      setMessage({
-        type: "err",
-        text: err instanceof Error ? err.message : "Google-inlog mislukt.",
-      });
-      setLoading(false);
-    }
-  }
-
   return (
     <div className="beheer-login">
       <div className="beheer-login__card">
@@ -134,16 +116,6 @@ export default function LoginForm() {
             </p>
           )}
         </form>
-
-        <div className="beheer-login__divider">of</div>
-        <button
-          type="button"
-          className="beheer-login__google"
-          onClick={handleGoogle}
-          disabled={loading}
-        >
-          Inloggen met Google
-        </button>
       </div>
 
       <p className="beheer-login__back">
