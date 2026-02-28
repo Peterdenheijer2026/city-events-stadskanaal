@@ -92,13 +92,14 @@ export default function HomePage() {
 
         <section id="plattegrond" className="plattegrond">
           <Ticker alt />
-          <h2 className="section-title">Evenementen plattegrond</h2>
+          <h2 className="section-title">Evenementenplattegrond</h2>
           <div className="plattegrond__image-wrap">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src="/assets/plattegrond.jpg"
-              alt="Plattegrond evenementen Stadskanaal"
+              src="/assets/plattegrond.png"
+              alt="Plattegrond evenementen Stadskanaal met pleinen A t/m F, Vrijmarkt en parkeerzones P1–P4"
               className="plattegrond__image"
+              loading="lazy"
             />
           </div>
         </section>
@@ -137,14 +138,21 @@ export default function HomePage() {
           </ul>
         </nav>
         <div className="footer__social">
-          <p>Volg ons</p>
+          <a
+            href="https://www.facebook.com/profile.php?id=61586517177054"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Volg ons
+          </a>
         </div>
         <p className="footer__copy">
           &copy; {year} Stichting City Events Stadskanaal
         </p>
         <p className="footer__legal">
-          <Link href="#">Algemene voorwaarden</Link>
-          <Link href="#">Privacy</Link>
+          <Link href="/algemene-voorwaarden">Algemene voorwaarden</Link>
+          <Link href="/privacy">Privacy</Link>
+          <Link href="/beheer/login" className="footer__beheer">Beheerders login</Link>
         </p>
       </footer>
     </>

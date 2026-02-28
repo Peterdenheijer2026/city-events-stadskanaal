@@ -1,14 +1,8 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-
-const PLEINEN = [
-  "BijFerdy",
-  "Cafe de 2",
-  "Fox",
-  "Mamasthee",
-  "'t Mingelmous",
-] as const;
+import Link from "next/link";
+import { PLEINEN } from "@/lib/pleinen";
 
 export default function PleinenDropdown() {
   const [isOpen, setIsOpen] = useState(false);
@@ -42,10 +36,10 @@ export default function PleinenDropdown() {
         className={`pleinen-dropdown ${isOpen ? "is-open" : ""}`}
         role="menu"
       >
-        {PLEINEN.map((name) => (
-          <a key={name} href="#" role="menuitem">
+        {PLEINEN.map(({ slug, name }) => (
+          <Link key={slug} href={`/plein/${slug}`} role="menuitem">
             {name}
-          </a>
+          </Link>
         ))}
       </div>
     </div>
