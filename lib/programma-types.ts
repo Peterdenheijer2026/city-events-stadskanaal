@@ -8,6 +8,8 @@ export type ProgrammaData = {
   [PROGRAMMA_DATUM_27]?: ProgrammaDatum;
 };
 
+export type ProgrammaDatumKey = keyof ProgrammaData;
+
 export const DEFAULT_PROGRAMMA: ProgrammaData = {
   [PROGRAMMA_DATUM_26]: { enabled: false, items: [{ time: "", act: "" }] },
   [PROGRAMMA_DATUM_27]: { enabled: false, items: [{ time: "", act: "" }] },

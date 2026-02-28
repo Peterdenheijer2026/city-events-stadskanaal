@@ -9,6 +9,7 @@ import {
   PROGRAMMA_LABELS,
   parseProgrammaData,
   type ProgrammaData,
+  type ProgrammaDatumKey,
   type ProgrammaItem,
 } from "@/lib/programma-types";
 
@@ -64,21 +65,21 @@ export default function PleinEditForm({ pleinSlug, pleinName, initial }: Props) 
 
   const supabase = createClient();
 
-  function setDatumEnabled(datum: string, enabled: boolean) {
+  function setDatumEnabled(datum: ProgrammaDatumKey, enabled: boolean) {
     setProgramData((prev) => ({
       ...prev,
       [datum]: { ...prev[datum], enabled, items: prev[datum]?.items ?? [{ time: "", act: "" }] },
     }));
   }
 
-  function setDatumItems(datum: string, items: ProgrammaItem[]) {
+  function setDatumItems(datum: ProgrammaDatumKey, items: ProgrammaItem[]) {
     setProgramData((prev) => ({
       ...prev,
       [datum]: { ...prev[datum], items: items.length ? items : [{ time: "", act: "" }] },
     }));
   }
 
-  function addProgrammaRow(datum: string) {
+  function addProgrammaRow(datum: ProgrammaDatumKey) {
     const items = programData[datum]?.items ?? [{ time: "", act: "" }];
     setDatumItems(datum, [...items, { time: TIJD_OPTIES[0], act: "" }]);
   }
@@ -89,7 +90,7 @@ export default function PleinEditForm({ pleinSlug, pleinName, initial }: Props) 
     setDatumItems(datum, items);
   }
 
-  function updateProgrammaRow(datum: string, index: number, field: "time" | "act", value: string) {
+  function updateProgrammaRow(datum: ProgrammaDatumKey, index: number, field: "time" | "act", value: string) {
     const items = [...(programData[datum]?.items ?? [])];
     if (items[index]) items[index] = { ...items[index], [field]: value };
     setDatumItems(datum, items);
@@ -204,7 +205,7 @@ export default function PleinEditForm({ pleinSlug, pleinName, initial }: Props) 
 
       <div className="plein-edit__field">
         <h3 className="plein-edit__programma-title">Programma</h3>
-        {[PROGRAMMA_DATUM_26, PROGRAMMA_DATUM_27].map((datum) => (
+        {([PROGRAMMA_DATUM_26, PROGRAMMA_DATUM_27] as const).map((datum) => (
           <fieldset key={datum} className="plein-edit__programma-datum">
             <legend className="plein-edit__programma-legend">
               <label className="plein-edit__programma-check">
