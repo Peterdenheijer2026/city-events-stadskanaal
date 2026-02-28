@@ -84,7 +84,7 @@ export default function PleinEditForm({ pleinSlug, pleinName, initial }: Props) 
     setDatumItems(datum, [...items, { time: TIJD_OPTIES[0], act: "" }]);
   }
 
-  function removeProgrammaRow(datum: string, index: number) {
+  function removeProgrammaRow(datum: ProgrammaDatumKey, index: number) {
     const items = [...(programData[datum]?.items ?? [])];
     items.splice(index, 1);
     setDatumItems(datum, items);
