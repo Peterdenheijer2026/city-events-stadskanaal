@@ -4,6 +4,7 @@ export const PLEINEN = [
   { slug: "cafe-de-2", name: "Cafe de 2" },
   { slug: "fox", name: "Fox" },
   { slug: "mamasthee", name: "Mamasthee" },
+  { slug: "rotary", name: "Rotary" },
   { slug: "t-mingelmous", name: "'t Mingelmous" },
 ] as const;
 
