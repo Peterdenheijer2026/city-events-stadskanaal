@@ -38,8 +38,9 @@ function round2(n: number) {
 }
 
 function calcExclFromIncl(incl: number, rate: VatRate) {
-  if (rate === 0) return round2(incl);
-  return round2(incl / (1 + rate));
+  if (rate === 0) return incl;
+  // Bewaar een nauwkeurige exclusief-prijs; afronding doen we pas bij weergave.
+  return incl / (1 + rate);
 }
 
 async function assertTreasurer() {

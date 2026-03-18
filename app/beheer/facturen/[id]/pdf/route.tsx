@@ -129,7 +129,7 @@ function InvoicePdf({ data, logoUrl }: { data: InvoiceData; logoUrl: string }) {
   const totals = lines.reduce(
     (acc, l) => {
       const excl = l.unit_price_excl * l.quantity;
-      const incl = excl * (1 + l.vat_rate);
+      const incl = Math.round((excl * (1 + l.vat_rate) + Number.EPSILON) * 100) / 100;
       acc.excl += excl;
       acc.incl += incl;
       acc.vat += incl - excl;
@@ -190,7 +190,7 @@ function InvoicePdf({ data, logoUrl }: { data: InvoiceData; logoUrl: string }) {
           </View>
           {lines.map((l) => {
             const excl = l.unit_price_excl * l.quantity;
-            const incl = excl * (1 + l.vat_rate);
+            const incl = Math.round((excl * (1 + l.vat_rate) + Number.EPSILON) * 100) / 100;
             return (
               <View key={l.position} style={styles.tr}>
                 <Text style={[styles.td, styles.c1]}>{l.position}</Text>

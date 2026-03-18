@@ -32,7 +32,7 @@ export default async function FactuurDetailPage({
   const totals = lines.reduce(
     (acc, l) => {
       const excl = l.unit_price_excl * l.quantity;
-      const incl = excl * (1 + l.vat_rate);
+      const incl = Math.round((excl * (1 + l.vat_rate) + Number.EPSILON) * 100) / 100;
       acc.excl += excl;
       acc.incl += incl;
       acc.vat += incl - excl;
@@ -86,7 +86,7 @@ export default async function FactuurDetailPage({
               <tbody>
                 {lines.map((l) => {
                   const excl = l.unit_price_excl * l.quantity;
-                  const incl = excl * (1 + l.vat_rate);
+                  const incl = Math.round((excl * (1 + l.vat_rate) + Number.EPSILON) * 100) / 100;
                   return (
                     <tr key={l.position}>
                       <td>{l.position}</td>
