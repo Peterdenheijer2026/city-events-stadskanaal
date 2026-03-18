@@ -1,4 +1,5 @@
 import "./globals.css";
+import CookieBanner from "./components/CookieBanner";
 
 export const viewport = {
   width: "device-width",
@@ -28,7 +29,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="nl">
-      <body>{children}</body>
+      <body>
+        {children}
+        <CookieBanner />
+      </body>
     </html>
   );
 }

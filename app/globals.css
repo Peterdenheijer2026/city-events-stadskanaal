@@ -34,6 +34,100 @@ body {
   -webkit-text-size-adjust: 100%;
 }
 
+/* ========== COOKIE BANNER ========== */
+.cookie-banner {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 9999;
+  padding: 1rem;
+  background: rgba(10, 10, 10, 0.72);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-top: 1px solid rgba(255, 255, 255, 0.10);
+}
+
+.cookie-banner__inner {
+  max-width: var(--container);
+  margin: 0 auto;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.cookie-banner__text strong {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  margin-bottom: 0.25rem;
+}
+
+.cookie-banner__text p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.85);
+  max-width: 64ch;
+}
+
+.cookie-banner__link {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.cookie-banner__actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.cookie-banner__btn {
+  border: none;
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  font-weight: 700;
+  font-size: 0.95rem;
+  min-height: 44px;
+  cursor: pointer;
+  transition: transform 120ms ease, filter 120ms ease;
+}
+
+.cookie-banner__btn:active {
+  transform: translateY(1px);
+}
+
+.cookie-banner__btn--primary {
+  background: var(--color-orange);
+  color: var(--color-bg);
+}
+
+.cookie-banner__btn--secondary {
+  background: rgba(255, 255, 255, 0.10);
+  color: var(--color-white);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.cookie-banner__btn:hover {
+  filter: brightness(1.05);
+}
+
+@media (max-width: 768px) {
+  .cookie-banner__inner {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .cookie-banner__actions {
+    justify-content: stretch;
+  }
+
+  .cookie-banner__btn {
+    width: 100%;
+  }
+}
+
 @media (max-width: 768px) {
   body {
     padding-bottom: env(safe-area-inset-bottom, 0);
@@ -1125,6 +1219,238 @@ ul {
 .beheer-dashboard__no-delete {
   color: var(--color-gray);
   font-size: 0.875rem;
+}
+
+/* ========== FACTUREN ========== */
+.invoice-form__section {
+  margin-bottom: 2rem;
+  padding: 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.invoice-form__section h2 {
+  font-size: 1.1rem;
+  margin: 0 0 1rem;
+}
+
+.invoice-form__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.invoice-form__grid label {
+  display: grid;
+  gap: 0.35rem;
+  font-size: 0.875rem;
+}
+
+.invoice-form__grid input,
+.invoice-form__grid textarea {
+  width: 100%;
+  padding: 0.6rem 0.7rem;
+  background: var(--color-bg-alt);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 6px;
+  color: var(--color-white);
+  font-family: inherit;
+}
+
+.invoice-form__span2 {
+  grid-column: span 2;
+}
+
+.invoice-lines {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.invoice-lines__head,
+.invoice-lines__row {
+  display: grid;
+  grid-template-columns: 2.2fr 0.7fr 0.7fr 0.9fr 0.9fr 0.8fr 1fr 32px;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.invoice-lines__head {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.7);
+  padding: 0 0.1rem;
+}
+
+.invoice-lines__row input,
+.invoice-lines__row select {
+  width: 100%;
+  padding: 0.55rem 0.6rem;
+  background: var(--color-bg-alt);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 6px;
+  color: var(--color-white);
+  font-family: inherit;
+  font-size: 0.9rem;
+}
+
+.invoice-lines__calc {
+  font-variant-numeric: tabular-nums;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.invoice-lines__remove {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.85);
+  cursor: pointer;
+}
+
+.invoice-lines__remove:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.invoice-form__actions {
+  margin-top: 0.75rem;
+}
+
+.invoice-form__btn,
+.invoice-form__submit {
+  border: none;
+  border-radius: 10px;
+  padding: 0.7rem 0.9rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.invoice-form__btn {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--color-white);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.invoice-form__submit {
+  background: var(--color-orange);
+  color: var(--color-bg);
+}
+
+.invoice-totals {
+  margin-top: 1rem;
+  max-width: 420px;
+  margin-left: auto;
+  display: grid;
+  gap: 0.35rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.invoice-totals__row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.invoice-totals__row--sub {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.9rem;
+}
+
+.invoice-totals__row--grand {
+  margin-top: 0.35rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.16);
+  font-size: 1.05rem;
+}
+
+.invoice-form__footer {
+  display: flex;
+  justify-content: flex-end;
+  padding-bottom: 2rem;
+}
+
+.invoice-search {
+  margin-bottom: 1rem;
+}
+
+.invoice-search input {
+  width: min(520px, 100%);
+  padding: 0.65rem 0.75rem;
+  background: var(--color-bg-alt);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 8px;
+  color: var(--color-white);
+  font-family: inherit;
+}
+
+.invoice-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+
+.invoice-badge {
+  display: inline-block;
+  margin-left: 0.5rem;
+  padding: 0.15rem 0.4rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.invoice-badge--overdue {
+  border-color: rgba(244, 67, 54, 0.6);
+  color: #ef9a9a;
+  background: rgba(244, 67, 54, 0.15);
+}
+
+.invoice-delete {
+  background: transparent;
+  border: 1px solid rgba(244, 67, 54, 0.6);
+  color: #ef9a9a;
+  border-radius: 8px;
+  padding: 0.3rem 0.55rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+}
+
+.invoice-delete:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 900px) {
+  .invoice-form__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .invoice-form__span2 {
+    grid-column: span 2;
+  }
+  .invoice-lines__head {
+    display: none;
+  }
+  .invoice-lines__row {
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    padding: 0.75rem;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.02);
+  }
+  .invoice-lines__calc {
+    grid-column: span 1;
+  }
+  .invoice-lines__remove {
+    grid-column: 2;
+    justify-self: end;
+  }
+  .invoice-totals {
+    max-width: none;
+  }
 }
 
 /* ========== BEHEER PLEIN BEWERKEN ========== */

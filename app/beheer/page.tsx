@@ -5,6 +5,7 @@ import { PLEINEN } from "@/lib/pleinen";
 import BeheerDashboard from "./BeheerDashboard";
 
 const SUPER_ADMIN_EMAIL = "admin@cityeventsstadskanaal.nl";
+const TREASURER_EMAIL = "penningmeester@cityeventsstadskanaal.nl";
 
 export default async function BeheerPage() {
   const supabase = await createClient();
@@ -14,6 +15,7 @@ export default async function BeheerPage() {
   }
 
   const isSuperAdminByEmail = user.email?.toLowerCase() === SUPER_ADMIN_EMAIL;
+  const isTreasurer = user.email?.toLowerCase() === TREASURER_EMAIL;
 
   let profile: { is_super_admin: boolean } | null = null;
   let permissions: { plein_slug: string }[] = [];
@@ -42,7 +44,7 @@ export default async function BeheerPage() {
       .select("plein_slug")
       .eq("user_id", user.id);
     permissions = perms ?? [];
-    if (permissions.length === 0) {
+    if (permissions.length === 0 && !isTreasurer) {
       redirect("/beheer/no-access");
     }
   }
@@ -65,6 +67,7 @@ export default async function BeheerPage() {
 
       <BeheerDashboard
         isSuperAdmin={isSuperAdmin}
+        isTreasurer={isTreasurer}
         pleinen={PLEINEN}
         myPermissions={isSuperAdmin ? PLEINEN.map((p) => p.slug) : permissions.map((p) => p.plein_slug)}
         allProfiles={allProfiles}

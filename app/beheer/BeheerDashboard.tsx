@@ -8,9 +8,11 @@ import { deleteUserAccount } from "./actions";
 import type { PleinItem } from "@/lib/pleinen";
 
 const SUPER_ADMIN_EMAIL = "admin@cityeventsstadskanaal.nl";
+const TREASURER_EMAIL = "penningmeester@cityeventsstadskanaal.nl";
 
 type Props = {
   isSuperAdmin: boolean;
+  isTreasurer: boolean;
   pleinen: readonly PleinItem[];
   myPermissions: string[];
   allProfiles: { id: string; email: string; is_super_admin: boolean }[];
@@ -20,6 +22,7 @@ type Props = {
 
 export default function BeheerDashboard({
   isSuperAdmin,
+  isTreasurer,
   pleinen,
   myPermissions,
   allProfiles,
@@ -75,6 +78,19 @@ export default function BeheerDashboard({
           Fout bij opslaan: {error}
         </p>
       )}
+
+      {isTreasurer && (
+        <section className="beheer-dashboard__section">
+          <h2>Facturen</h2>
+          <p className="beheer-dashboard__hint">
+            Facturen aanmaken en als PDF downloaden.
+          </p>
+          <Link href="/beheer/facturen" className="beheer-dashboard__link">
+            Naar facturen
+          </Link>
+        </section>
+      )}
+
       {isSuperAdmin && (
         <section className="beheer-dashboard__section">
           <h2>Pleinrechten toewijzen</h2>
