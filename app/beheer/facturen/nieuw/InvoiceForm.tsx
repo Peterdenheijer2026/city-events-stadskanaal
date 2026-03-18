@@ -57,6 +57,9 @@ function calcFromIncl(incl: number, rate: VatRate) {
 export default function InvoiceForm() {
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const [addressLookupError, setAddressLookupError] = useState<string | null>(null);
+  const [addressLookupPending, setAddressLookupPending] = useState(false);
+  const [manualAddress, setManualAddress] = useState(false);
   const [customer, setCustomer] = useState<Customer>({
     name: "",
     postcode: "",
@@ -228,6 +231,42 @@ export default function InvoiceForm() {
     });
   }
 
+  async function lookupAddress() {
+    setAddressLookupError(null);
+    const pc = customer.postcode.replace(/\s+/g, "").toUpperCase();
+    const nr = customer.houseNumber.trim();
+    if (!pc || !nr) return;
+
+    setAddressLookupPending(true);
+    try {
+      const res = await fetch("/api/postcode", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ postcode: pc, houseNumber: nr }),
+      });
+      if (!res.ok) {
+        if (res.status === 404) {
+          setAddressLookupError("Adres niet gevonden. Vul straat en plaats handmatig in.");
+        } else if (res.status === 500) {
+          setAddressLookupError("Postcode-service niet geconfigureerd. Vul adres handmatig in.");
+        } else {
+          setAddressLookupError("Adres ophalen mislukt. Vul adres handmatig in.");
+        }
+        return;
+      }
+      const data = (await res.json()) as { street?: string; city?: string };
+      setCustomer((c) => ({
+        ...c,
+        street: data.street ?? c.street,
+        city: data.city ?? c.city,
+      }));
+    } catch {
+      setAddressLookupError("Adres ophalen mislukt. Vul adres handmatig in.");
+    } finally {
+      setAddressLookupPending(false);
+    }
+  }
+
   return (
     <form className="invoice-form" onSubmit={handleSubmit}>
       {error && (
@@ -251,6 +290,7 @@ export default function InvoiceForm() {
             <input
               value={customer.postcode}
               onChange={(e) => setCustomer((c) => ({ ...c, postcode: e.target.value.toUpperCase() }))}
+              onBlur={lookupAddress}
               placeholder="1234AB"
               inputMode="text"
             />
@@ -260,6 +300,7 @@ export default function InvoiceForm() {
             <input
               value={customer.houseNumber}
               onChange={(e) => setCustomer((c) => ({ ...c, houseNumber: e.target.value }))}
+              onBlur={lookupAddress}
               inputMode="numeric"
               placeholder="12"
             />
@@ -278,6 +319,7 @@ export default function InvoiceForm() {
               value={customer.street}
               onChange={(e) => setCustomer((c) => ({ ...c, street: e.target.value }))}
               placeholder="Straatnaam"
+              readOnly={!manualAddress}
             />
           </label>
           <label>
@@ -286,6 +328,7 @@ export default function InvoiceForm() {
               value={customer.city}
               onChange={(e) => setCustomer((c) => ({ ...c, city: e.target.value }))}
               placeholder="Stadskanaal"
+              readOnly={!manualAddress}
             />
           </label>
           <label>
@@ -297,6 +340,23 @@ export default function InvoiceForm() {
             />
           </label>
         </div>
+        {addressLookupError && (
+          <p className="beheer-dashboard__hint" style={{ color: "#ef9a9a", marginTop: "0.5rem" }}>
+            {addressLookupError}
+          </p>
+        )}
+        {!manualAddress && (
+          <div className="invoice-form__actions" style={{ marginTop: "0.5rem" }}>
+            <button
+              type="button"
+              className="invoice-form__btn"
+              onClick={() => setManualAddress(true)}
+              disabled={addressLookupPending}
+            >
+              Adres handmatig invullen
+            </button>
+          </div>
+        )}
       </section>
 
       <section className="invoice-form__section">
