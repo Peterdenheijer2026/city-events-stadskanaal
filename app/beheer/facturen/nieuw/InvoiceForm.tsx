@@ -101,14 +101,21 @@ export default function InvoiceForm() {
     const perLine = lines.map((l) => {
       const q = toNumber(l.quantity) ?? 0;
       const rate = l.vatRate;
+      const inclInput = toNumber(l.unitIncl);
+      const exclInput = toNumber(l.unitExcl);
+
       const base =
         l.lastEdited === "incl"
-          ? calcFromIncl(toNumber(l.unitIncl) ?? 0, rate)
-          : calcFromExcl(toNumber(l.unitExcl) ?? 0, rate);
+          ? calcFromIncl(inclInput ?? 0, rate)
+          : calcFromExcl(exclInput ?? 0, rate);
 
-      const lineExcl = round2(base.excl * q);
-      const lineIncl = round2(base.incl * q);
-      const lineVat = round2(base.vat * q);
+      const unitIncl =
+        l.lastEdited === "incl" && inclInput !== null ? round2(inclInput) : base.incl;
+      const unitExcl = base.excl;
+
+      const lineExcl = round2(unitExcl * q);
+      const lineIncl = round2(unitIncl * q);
+      const lineVat = round2(lineIncl - lineExcl);
 
       totalExcl = round2(totalExcl + lineExcl);
       totalVat = round2(totalVat + lineVat);
@@ -121,9 +128,9 @@ export default function InvoiceForm() {
       vatBuckets[key].incl = round2(vatBuckets[key].incl + lineIncl);
 
       return {
-        unitExcl: base.excl,
-        unitIncl: base.incl,
-        unitVat: base.vat,
+        unitExcl,
+        unitIncl,
+        unitVat: round2(unitIncl - unitExcl),
         lineExcl,
         lineVat,
         lineIncl,
