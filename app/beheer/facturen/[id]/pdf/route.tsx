@@ -10,8 +10,8 @@ const STICHTING = {
   name: "Stichting City Events Stadskanaal",
   addressLines: ["Navolaan 7", "9501 CX Stadskanaal"],
   kvk: "01147116",
-  btw: "",
-  iban: "",
+  btw: "", // BTW-id invullen wanneer bekend
+  iban: "NL45 RABO 0122 8828 22",
   paymentTermDays: 14,
 };
 
@@ -161,7 +161,6 @@ function InvoicePdf({ data, logoUrl }: { data: InvoiceData; logoUrl: string }) {
                 Vervaldatum: {due.toLocaleDateString("nl-NL", { day: "2-digit", month: "2-digit", year: "numeric" })}
               </Text>
             ) : null}
-            {invoice.subject ? <Text style={styles.small}>Onderwerp: {invoice.subject}</Text> : null}
           </View>
         </View>
 
@@ -176,8 +175,13 @@ function InvoicePdf({ data, logoUrl }: { data: InvoiceData; logoUrl: string }) {
           <Text>
             {customer.postcode ?? ""} {customer.city ?? ""}
           </Text>
-          <Text>{customer.country}</Text>
         </View>
+
+        {invoice.subject ? (
+          <View style={{ marginTop: 14 }}>
+            <Text style={styles.small}>Onderwerp: {invoice.subject}</Text>
+          </View>
+        ) : null}
 
         <View style={styles.table}>
           <View style={styles.trHead}>
@@ -228,9 +232,9 @@ function InvoicePdf({ data, logoUrl }: { data: InvoiceData; logoUrl: string }) {
 
         <Text style={styles.footer}>
           {STICHTING.name}
-          {STICHTING.iban ? ` • IBAN: ${STICHTING.iban}` : ""}
           {STICHTING.kvk ? ` • KvK: ${STICHTING.kvk}` : ""}
-          {STICHTING.btw ? ` • BTW: ${STICHTING.btw}` : ""}
+          {STICHTING.iban ? ` • IBAN: ${STICHTING.iban}` : ""}
+          {STICHTING.btw ? ` • BTW-id: ${STICHTING.btw}` : ""}
         </Text>
       </Page>
     </Document>

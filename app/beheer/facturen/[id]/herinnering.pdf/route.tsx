@@ -9,6 +9,9 @@ const TREASURER_EMAIL = "penningmeester@cityeventsstadskanaal.nl";
 const STICHTING = {
   name: "Stichting City Events Stadskanaal",
   addressLines: ["Navolaan 7", "9501 CX Stadskanaal"],
+  kvk: "01147116",
+  btw: "", // BTW-id invullen wanneer bekend
+  iban: "NL45 RABO 0122 8828 22",
   paymentTermDays: 14,
 };
 
@@ -107,6 +110,7 @@ const styles = StyleSheet.create({
   totals: { marginTop: 14, alignSelf: "flex-end", width: "45%" },
   totalRow: { flexDirection: "row", justifyContent: "space-between", paddingVertical: 3 },
   totalGrand: { marginTop: 6, paddingTop: 6, borderTopWidth: 1, borderTopColor: "#ddd", fontWeight: 700 },
+  footer: { position: "absolute", bottom: 24, left: 36, right: 36, fontSize: 9, color: "#666" },
 });
 
 type InvoiceData = {
@@ -205,6 +209,13 @@ function ReminderPdf({ data, logoUrl }: { data: InvoiceData; logoUrl: string }) 
             <Text>{eur(totals.incl)}</Text>
           </View>
         </View>
+
+        <Text style={styles.footer} fixed>
+          {STICHTING.name}
+          {STICHTING.kvk ? ` • KvK: ${STICHTING.kvk}` : ""}
+          {STICHTING.iban ? ` • IBAN: ${STICHTING.iban}` : ""}
+          {STICHTING.btw ? ` • BTW-id: ${STICHTING.btw}` : ""}
+        </Text>
       </Page>
     </Document>
   );
