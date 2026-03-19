@@ -151,7 +151,7 @@ function InvoicePdf({ data, logoUrl }: { data: InvoiceData; logoUrl: string }) {
               </Text>
             ))}
           </View>
-          <View style={{ alignItems: "flex-end", marginTop: 18 }}>
+          <View style={{ alignItems: "flex-end", marginTop: 54 }}>
             <Text style={styles.small}>Factuurnummer: {invoice.invoice_number}</Text>
             <Text style={styles.small}>Factuurdatum: {formatDate(invoice.invoice_date)}</Text>
             <Text style={styles.small}>Betaaltermijn: {STICHTING.paymentTermDays} dagen</Text>
