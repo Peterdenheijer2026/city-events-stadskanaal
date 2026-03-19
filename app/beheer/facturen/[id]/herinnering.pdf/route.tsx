@@ -10,7 +10,7 @@ const STICHTING = {
   name: "Stichting City Events Stadskanaal",
   addressLines: ["Navolaan 7", "9501 CX Stadskanaal"],
   kvk: "01147116",
-  btw: "", // BTW-id invullen wanneer bekend
+  btw: "NL820526861B01",
   iban: "NL45 RABO 0122 8828 22",
   paymentTermDays: 14,
 };

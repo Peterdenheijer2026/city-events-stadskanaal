@@ -10,7 +10,7 @@ const STICHTING = {
   name: "Stichting City Events Stadskanaal",
   addressLines: ["Navolaan 7", "9501 CX Stadskanaal"],
   kvk: "01147116",
-  btw: "", // BTW-id invullen wanneer bekend
+  btw: "NL820526861B01",
   iban: "NL45 RABO 0122 8828 22",
   paymentTermDays: 14,
 };
@@ -144,7 +144,6 @@ function InvoicePdf({ data, logoUrl }: { data: InvoiceData; logoUrl: string }) {
         <View style={styles.header}>
           <View style={styles.headerLeft}>
             <Image src={logoUrl} style={styles.logo} />
-            <Text style={styles.h1}>Factuur</Text>
             <Text style={styles.small}>{STICHTING.name}</Text>
             {STICHTING.addressLines.map((l) => (
               <Text key={l} style={styles.small}>
@@ -152,7 +151,7 @@ function InvoicePdf({ data, logoUrl }: { data: InvoiceData; logoUrl: string }) {
               </Text>
             ))}
           </View>
-          <View style={{ alignItems: "flex-end" }}>
+          <View style={{ alignItems: "flex-end", marginTop: 18 }}>
             <Text style={styles.small}>Factuurnummer: {invoice.invoice_number}</Text>
             <Text style={styles.small}>Factuurdatum: {formatDate(invoice.invoice_date)}</Text>
             <Text style={styles.small}>Betaaltermijn: {STICHTING.paymentTermDays} dagen</Text>
