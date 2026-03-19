@@ -1,5 +1,7 @@
 @echo off
 cd /d "%~dp0"
+REM Als dit script in htdocs staat, ga naar de projectmap waar .git staat
+if not exist ".git" if exist "buidlingsite\.git" cd /d "%~dp0buidlingsite"
 echo ===== Deploy naar Vercel (commit + push naar GitHub) =====
 echo.
 
