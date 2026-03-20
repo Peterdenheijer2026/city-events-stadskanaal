@@ -17,6 +17,7 @@ type Line = {
 
 type Customer = {
   name: string;
+  email: string;
   postcode: string;
   houseNumber: string;
   houseNumberAddition: string;
@@ -62,6 +63,7 @@ export default function InvoiceForm() {
   const [manualAddress, setManualAddress] = useState(false);
   const [customer, setCustomer] = useState<Customer>({
     name: "",
+    email: "",
     postcode: "",
     houseNumber: "",
     houseNumberAddition: "",
@@ -290,6 +292,16 @@ export default function InvoiceForm() {
               value={customer.name}
               onChange={(e) => setCustomer((c) => ({ ...c, name: e.target.value }))}
               required
+            />
+          </label>
+          <label className="invoice-form__span2">
+            E-mail (voor verzenden factuur)
+            <input
+              type="email"
+              autoComplete="email"
+              value={customer.email}
+              onChange={(e) => setCustomer((c) => ({ ...c, email: e.target.value }))}
+              placeholder="optioneel, bijv. sponsor@bedrijf.nl"
             />
           </label>
           <label>

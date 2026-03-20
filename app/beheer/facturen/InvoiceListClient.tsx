@@ -2,13 +2,15 @@
 
 import Link from "next/link";
 import { useMemo, useState, useTransition } from "react";
-import { setInvoicePaid, setInvoiceSent } from "./actions";
+import { useRouter } from "next/navigation";
+import { sendInvoiceByEmail, setInvoicePaid, setInvoiceSent } from "./actions";
 
 type Row = {
   id: string;
   invoice_number: string;
   invoice_date: string;
   customer_name: string | null;
+  customer_email: string | null;
   subject: string | null;
   sent_at: string | null;
   paid_at: string | null;
@@ -19,7 +21,14 @@ function daysBetween(a: Date, b: Date) {
   return Math.floor(ms / (1000 * 60 * 60 * 24));
 }
 
-export default function InvoiceListClient({ rows }: { rows: Row[] }) {
+export default function InvoiceListClient({
+  rows,
+  emailConfigured,
+}: {
+  rows: Row[];
+  emailConfigured: boolean;
+}) {
+  const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [query, setQuery] = useState("");
@@ -65,6 +74,7 @@ export default function InvoiceListClient({ rows }: { rows: Row[] }) {
                   <th>Datum</th>
                   <th>Klant</th>
                   <th>Onderwerp</th>
+                  {tone === "unsent" && <th>E-mail</th>}
                   <th>Verstuurd</th>
                   <th>Betaald</th>
                 </tr>
@@ -84,6 +94,33 @@ export default function InvoiceListClient({ rows }: { rows: Row[] }) {
                       <td className="facturen-table__muted">{r.invoice_date}</td>
                       <td>{r.customer_name ?? "—"}</td>
                       <td className="facturen-table__clip">{r.subject ?? "—"}</td>
+                      {tone === "unsent" && (
+                        <td>
+                          {r.customer_email && emailConfigured ? (
+                            <button
+                              type="button"
+                              className="facturen-btn facturen-btn--ghost facturen-btn--tiny"
+                              disabled={pending}
+                              onClick={() => {
+                                setError(null);
+                                startTransition(async () => {
+                                  const res = await sendInvoiceByEmail(r.id);
+                                  if (res.error) setError(res.error);
+                                  else router.refresh();
+                                });
+                              }}
+                            >
+                              Verstuur
+                            </button>
+                          ) : r.customer_email && !emailConfigured ? (
+                            <span className="facturen-table__muted" title="E-mail niet geconfigureerd">
+                              —
+                            </span>
+                          ) : (
+                            <span className="facturen-table__muted">—</span>
+                          )}
+                        </td>
+                      )}
                       <td>
                         <label className="invoice-toggle">
                           <input

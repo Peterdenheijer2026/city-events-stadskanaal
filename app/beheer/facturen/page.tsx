@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { FinancienNav } from "@/app/components/FinancienNav";
+import { isInvoiceEmailConfigured } from "@/lib/send-invoice-email";
 import { redirect } from "next/navigation";
 import { listInvoices } from "./actions";
 import InvoiceListClient from "./InvoiceListClient";
@@ -19,6 +20,7 @@ export default async function FacturenPage() {
   if (!ok.ok) redirect("/beheer/no-access");
 
   const rows = await listInvoices();
+  const emailConfigured = isInvoiceEmailConfigured();
   return (
     <div className="beheer-page beheer-page--facturen">
       <div className="facturen-app">
@@ -43,7 +45,7 @@ export default async function FacturenPage() {
               </Link>
             </div>
           ) : (
-            <InvoiceListClient rows={rows} />
+            <InvoiceListClient rows={rows} emailConfigured={emailConfigured} />
           )}
         </main>
       </div>

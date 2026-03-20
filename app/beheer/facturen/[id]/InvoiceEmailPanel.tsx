@@ -1,0 +1,102 @@
+"use client";
+
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { sendInvoiceByEmail, updateInvoiceCustomerEmail } from "../actions";
+
+export default function InvoiceEmailPanel({
+  invoiceId,
+  initialEmail,
+  sentAt,
+  emailConfigured,
+}: {
+  invoiceId: string;
+  initialEmail: string | null;
+  sentAt: string | null;
+  emailConfigured: boolean;
+}) {
+  const router = useRouter();
+  const [email, setEmail] = useState(initialEmail ?? "");
+  const [error, setError] = useState<string | null>(null);
+  const [pending, startTransition] = useTransition();
+
+  const canSend = !sentAt && email.trim().length > 0 && emailConfigured;
+
+  function saveEmail(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    startTransition(async () => {
+      const res = await updateInvoiceCustomerEmail(invoiceId, email || null);
+      if (res.error) {
+        setError(res.error);
+        return;
+      }
+      router.refresh();
+    });
+  }
+
+  function send() {
+    setError(null);
+    startTransition(async () => {
+      const res = await sendInvoiceByEmail(invoiceId);
+      if (res.error) {
+        setError(res.error);
+        return;
+      }
+      router.refresh();
+    });
+  }
+
+  return (
+    <section className="invoice-form__section facturen-panel">
+      <h2 className="facturen-panel__h">E-mail</h2>
+      <p className="facturen-panel__intro">
+        Factuur als PDF versturen naar het e-mailadres van de betaler (via Resend). Na verzenden wordt de factuur
+        automatisch als <strong>verstuurd</strong> gemarkeerd.
+      </p>
+      {!emailConfigured && (
+        <p className="facturen-alert facturen-alert--warn" role="status">
+          E-mailverzending is nog niet geconfigureerd. Zet <code>RESEND_API_KEY</code> en <code>EMAIL_FROM</code> in{" "}
+          <code>.env.local</code> (zie documentatie bij de boekhouding).
+        </p>
+      )}
+      {error && (
+        <p className="facturen-alert facturen-alert--error" role="alert">
+          {error}
+        </p>
+      )}
+      <form className="facturen-email-form" onSubmit={saveEmail}>
+        <label className="facturen-email-form__label">
+          E-mailadres betaler
+          <input
+            type="email"
+            autoComplete="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="naam@voorbeeld.nl"
+            disabled={pending}
+          />
+        </label>
+        <div className="facturen-email-form__actions">
+          <button type="submit" className="facturen-btn facturen-btn--ghost" disabled={pending}>
+            Opslaan
+          </button>
+          <button
+            type="button"
+            className="facturen-btn facturen-btn--primary"
+            disabled={pending || !canSend}
+            onClick={send}
+          >
+            Factuur versturen
+          </button>
+        </div>
+      </form>
+      {sentAt && (
+        <p className="facturen-table__muted" style={{ marginTop: "0.75rem" }}>
+          Deze factuur is al gemarkeerd als verstuurd ({new Date(sentAt).toLocaleString("nl-NL")}). Versturen opnieuw
+          is uitgeschakeld; gebruik anders PDF downloaden.
+        </p>
+      )}
+    </section>
+  );
+}

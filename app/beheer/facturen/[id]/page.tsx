@@ -2,7 +2,9 @@ import { createClient } from "@/lib/supabase/server";
 import { FinancienNav } from "@/app/components/FinancienNav";
 import { redirect } from "next/navigation";
 import { getInvoice } from "../actions";
+import { isInvoiceEmailConfigured } from "@/lib/send-invoice-email";
 import DeleteInvoiceButton from "./DeleteInvoiceButton";
+import InvoiceEmailPanel from "./InvoiceEmailPanel";
 
 const TREASURER_EMAIL = "penningmeester@cityeventsstadskanaal.nl";
 
@@ -44,6 +46,7 @@ export default async function FactuurDetailPage({
   const statusLabel =
     invoice.paid_at != null ? "Betaald" : invoice.sent_at != null ? "Openstaand" : "Onverstuurd";
   const statusTone = invoice.paid_at != null ? "paid" : invoice.sent_at != null ? "sent" : "unsent";
+  const emailConfigured = isInvoiceEmailConfigured();
 
   return (
     <div className="beheer-page beheer-page--facturen">
@@ -98,8 +101,20 @@ export default async function FactuurDetailPage({
                 {customer.postcode ?? ""} {customer.city ?? ""}
               </span>
               {customer.country ? <span>{customer.country}</span> : null}
+              {customer.email ? (
+                <span>
+                  <strong>E-mail:</strong> {customer.email}
+                </span>
+              ) : null}
             </div>
           </section>
+
+          <InvoiceEmailPanel
+            invoiceId={id}
+            initialEmail={customer.email}
+            sentAt={invoice.sent_at}
+            emailConfigured={emailConfigured}
+          />
 
           <section className="invoice-form__section facturen-panel">
             <h2 className="facturen-panel__h">Factuurregels</h2>

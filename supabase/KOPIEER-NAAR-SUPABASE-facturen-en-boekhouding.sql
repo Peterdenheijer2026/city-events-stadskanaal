@@ -133,6 +133,10 @@ alter table public.invoices
 create index if not exists invoices_sent_at_idx on public.invoices(sent_at);
 create index if not exists invoices_paid_at_idx on public.invoices(paid_at);
 
+-- ---------- 016: e-mail bij debiteur (factuur per e-mail) ----------
+alter table public.invoice_customers
+  add column if not exists email text;
+
 -- ---------- 014: crediteuren (purchase_invoices) ----------
 create table if not exists public.purchase_invoices (
   id uuid primary key default gen_random_uuid(),

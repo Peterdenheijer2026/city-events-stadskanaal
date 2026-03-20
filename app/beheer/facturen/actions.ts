@@ -3,6 +3,10 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { getAppOrigin } from "@/lib/app-origin";
+import { loadInvoicePdfData } from "@/lib/invoice-pdf-data";
+import { buildInvoicePdfBuffer, STICHTING } from "@/lib/invoice-pdf";
+import { escapeHtml, sendInvoiceEmailResend } from "@/lib/send-invoice-email";
 
 const TREASURER_EMAIL = "penningmeester@cityeventsstadskanaal.nl";
 
@@ -23,6 +27,7 @@ export type InvoiceDraft = {
   notes: string;
   customer: {
     name: string;
+    email?: string | null;
     postcode: string;
     houseNumber: string;
     houseNumberAddition: string;
@@ -35,6 +40,10 @@ export type InvoiceDraft = {
 
 function round2(n: number) {
   return Math.round((n + Number.EPSILON) * 100) / 100;
+}
+
+function isValidEmail(s: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s.trim());
 }
 
 function calcExclFromIncl(incl: number, rate: VatRate) {
@@ -78,10 +87,18 @@ export async function createInvoice(draft: InvoiceDraft): Promise<{ id: string |
 
     const invoiceNumber = await nextInvoiceNumber(supabase, year);
 
+    const emailRaw = (draft.customer.email ?? "").trim();
+    let customerEmail: string | null = null;
+    if (emailRaw) {
+      if (!isValidEmail(emailRaw)) return { id: null, error: "Ongeldig e-mailadres." };
+      customerEmail = emailRaw.toLowerCase();
+    }
+
     const { data: customerRow, error: custErr } = await supabase
       .from("invoice_customers")
       .insert({
         name: draft.customer.name.trim(),
+        email: customerEmail,
         postcode: draft.customer.postcode?.trim() || null,
         house_number: draft.customer.houseNumber?.trim() || null,
         house_number_addition: draft.customer.houseNumberAddition?.trim() || null,
@@ -151,12 +168,21 @@ export async function createInvoice(draft: InvoiceDraft): Promise<{ id: string |
 }
 
 export async function listInvoices(): Promise<
-  { id: string; invoice_number: string; invoice_date: string; subject: string | null; customer_name: string | null; sent_at: string | null; paid_at: string | null }[]
+  {
+    id: string;
+    invoice_number: string;
+    invoice_date: string;
+    subject: string | null;
+    customer_name: string | null;
+    customer_email: string | null;
+    sent_at: string | null;
+    paid_at: string | null;
+  }[]
 > {
   const { supabase } = await assertTreasurer();
   const { data, error } = await supabase
     .from("invoices")
-    .select("id, invoice_number, invoice_date, subject, sent_at, paid_at, invoice_customers(name)")
+    .select("id, invoice_number, invoice_date, subject, sent_at, paid_at, invoice_customers(name, email)")
     .order("invoice_date", { ascending: false })
     .limit(50);
   if (error) throw error;
@@ -168,6 +194,7 @@ export async function listInvoices(): Promise<
     sent_at: r.sent_at ?? null,
     paid_at: r.paid_at ?? null,
     customer_name: r.invoice_customers?.name ?? null,
+    customer_email: r.invoice_customers?.email ?? null,
   }));
 }
 
@@ -217,7 +244,16 @@ export async function deleteInvoice(id: string): Promise<{ error: string | null 
 
 export async function getInvoice(id: string): Promise<{
   invoice: { id: string; invoice_number: string; invoice_date: string; subject: string | null; notes: string | null; sent_at: string | null; paid_at: string | null };
-  customer: { name: string; postcode: string | null; house_number: string | null; house_number_addition: string | null; street: string | null; city: string | null; country: string };
+  customer: {
+    name: string;
+    email: string | null;
+    postcode: string | null;
+    house_number: string | null;
+    house_number_addition: string | null;
+    street: string | null;
+    city: string | null;
+    country: string;
+  };
   lines: { position: number; description: string; quantity: number; unit_price_excl: number; vat_rate: VatRate }[];
 } | null> {
   const { supabase } = await assertTreasurer();
@@ -231,7 +267,7 @@ export async function getInvoice(id: string): Promise<{
 
   const { data: customer, error: custErr } = await supabase
     .from("invoice_customers")
-    .select("name, postcode, house_number, house_number_addition, street, city, country")
+    .select("name, email, postcode, house_number, house_number_addition, street, city, country")
     .eq("id", invoice.customer_id)
     .single();
   if (custErr) return null;
@@ -256,5 +292,85 @@ export async function getInvoice(id: string): Promise<{
     customer: customer as any,
     lines: (lines ?? []) as any,
   };
+}
+
+export async function updateInvoiceCustomerEmail(
+  invoiceId: string,
+  email: string | null
+): Promise<{ error: string | null }> {
+  try {
+    const { supabase } = await assertTreasurer();
+    const trimmed = email?.trim() ?? "";
+    let value: string | null = null;
+    if (trimmed) {
+      if (!isValidEmail(trimmed)) return { error: "Ongeldig e-mailadres." };
+      value = trimmed.toLowerCase();
+    }
+
+    const { data: inv, error: invErr } = await supabase
+      .from("invoices")
+      .select("customer_id")
+      .eq("id", invoiceId)
+      .single();
+    if (invErr || !inv) return { error: "Factuur niet gevonden." };
+
+    const { error } = await supabase.from("invoice_customers").update({ email: value }).eq("id", inv.customer_id);
+    if (error) return { error: error.message };
+    revalidatePath("/beheer/facturen");
+    revalidatePath(`/beheer/facturen/${invoiceId}`);
+    return { error: null };
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : "Opslaan mislukt." };
+  }
+}
+
+/**
+ * Verstuurt de factuur-PDF per e-mail (Resend) en zet sent_at als de mail is verzonden.
+ */
+export async function sendInvoiceByEmail(invoiceId: string): Promise<{ error: string | null }> {
+  try {
+    const { supabase } = await assertTreasurer();
+
+    const data = await getInvoice(invoiceId);
+    if (!data) return { error: "Factuur niet gevonden." };
+
+    const to = data.customer.email?.trim();
+    if (!to) return { error: "Geen e-mailadres bij deze betaler. Vul eerst een e-mailadres in." };
+    if (!isValidEmail(to)) return { error: "Ongeldig e-mailadres bij deze betaler." };
+
+    const pdfData = await loadInvoicePdfData(supabase, invoiceId);
+    if (!pdfData) return { error: "Factuur niet gevonden." };
+
+    const origin = getAppOrigin();
+    const logoUrl = `${origin}/assets/logo.png`;
+    const pdfBytes = await buildInvoicePdfBuffer(pdfData, logoUrl);
+
+    const num = pdfData.invoice.invoice_number;
+    const html = `<p>Beste ${escapeHtml(data.customer.name)},</p>
+<p>Hierbij ontvangt u factuur <strong>${escapeHtml(num)}</strong> van ${escapeHtml(STICHTING.name)}.</p>
+<p>Met vriendelijke groet,<br/>${escapeHtml(STICHTING.name)}</p>`;
+
+    const sent = await sendInvoiceEmailResend({
+      to,
+      subject: `Factuur ${num} – ${STICHTING.name}`,
+      html,
+      pdfFilename: `factuur-${num}.pdf`,
+      pdfBytes,
+    });
+
+    if (!sent.ok) return { error: sent.error };
+
+    const { error: upErr } = await supabase
+      .from("invoices")
+      .update({ sent_at: new Date().toISOString() })
+      .eq("id", invoiceId);
+    if (upErr) return { error: upErr.message };
+
+    revalidatePath("/beheer/facturen");
+    revalidatePath(`/beheer/facturen/${invoiceId}`);
+    return { error: null };
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : "Versturen mislukt." };
+  }
 }
 
