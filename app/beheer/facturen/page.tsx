@@ -19,22 +19,38 @@ export default async function FacturenPage() {
 
   const rows = await listInvoices();
   return (
-    <div className="beheer-page">
-      <header className="beheer-page__header">
-        <h1>Facturen</h1>
-        <div className="beheer-page__actions">
-          <Link href="/beheer">← Terug</Link>
-          <Link href="/beheer/facturen/nieuw">Nieuwe factuur</Link>
-        </div>
-      </header>
+    <div className="beheer-page beheer-page--facturen">
+      <div className="facturen-app">
+        <header className="facturen-app__header">
+          <div className="facturen-app__title-block">
+            <p className="facturen-app__eyebrow">Financiën</p>
+            <h1 className="facturen-app__title">Facturen</h1>
+            <p className="facturen-app__subtitle">Overzicht, status en betalingen</p>
+          </div>
+          <div className="facturen-app__toolbar">
+            <Link href="/beheer" className="facturen-btn facturen-btn--ghost">
+              ← Beheer
+            </Link>
+            <Link href="/beheer/facturen/nieuw" className="facturen-btn facturen-btn--primary">
+              + Nieuwe factuur
+            </Link>
+          </div>
+        </header>
 
-      <main className="beheer-dashboard">
-        {rows.length === 0 ? (
-          <p className="beheer-dashboard__hint">Nog geen facturen. Klik op “Nieuwe factuur”.</p>
-        ) : (
-          <InvoiceListClient rows={rows} />
-        )}
-      </main>
+        <main className="facturen-app__main">
+          {rows.length === 0 ? (
+            <div className="facturen-empty">
+              <p className="facturen-empty__title">Nog geen facturen</p>
+              <p className="facturen-empty__text">Maak je eerste factuur aan om te beginnen.</p>
+              <Link href="/beheer/facturen/nieuw" className="facturen-btn facturen-btn--primary">
+                Nieuwe factuur
+              </Link>
+            </div>
+          ) : (
+            <InvoiceListClient rows={rows} />
+          )}
+        </main>
+      </div>
     </div>
   );
 }

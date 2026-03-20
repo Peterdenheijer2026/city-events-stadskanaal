@@ -38,6 +38,7 @@ export default function InvoiceListClient({ rows }: { rows: Row[] }) {
   const concept = filtered.filter((r) => !r.sent_at && !r.paid_at);
   const sent = filtered.filter((r) => !!r.sent_at && !r.paid_at);
   const paid = filtered.filter((r) => !!r.paid_at);
+  const totalAll = filtered.length;
 
   function fmtDateTime(iso: string | null) {
     if (!iso) return "—";
@@ -46,15 +47,18 @@ export default function InvoiceListClient({ rows }: { rows: Row[] }) {
     return d.toLocaleString("nl-NL", { dateStyle: "short", timeStyle: "short" });
   }
 
-  function renderTable(title: string, items: Row[]) {
+  function renderTable(title: string, items: Row[], tone: "draft" | "sent" | "paid") {
     return (
-      <section className="beheer-dashboard__section">
-        <h2>{title}</h2>
+      <section className="facturen-section">
+        <div className="facturen-section__head">
+          <h2 className="facturen-section__title">{title}</h2>
+          <span className={`facturen-section__count facturen-section__count--${tone}`}>{items.length}</span>
+        </div>
         {items.length === 0 ? (
-          <p className="beheer-dashboard__hint">Geen facturen.</p>
+          <p className="facturen-section__empty">Geen facturen in deze lijst.</p>
         ) : (
-          <div className="beheer-dashboard__table-wrap">
-            <table className="beheer-dashboard__table">
+          <div className="facturen-table-wrap">
+            <table className="facturen-table">
               <thead>
                 <tr>
                   <th>Nummer</th>
@@ -71,15 +75,15 @@ export default function InvoiceListClient({ rows }: { rows: Row[] }) {
                     !!r.sent_at && !r.paid_at && daysBetween(new Date(r.sent_at), new Date()) >= 14;
                   return (
                     <tr key={r.id}>
-                      <td>
-                        <Link href={`/beheer/facturen/${r.id}`} className="beheer-dashboard__link">
+                      <td className="facturen-table__num">
+                        <Link href={`/beheer/facturen/${r.id}`} className="facturen-table__link">
                           {r.invoice_number}
                         </Link>
-                        {overdue && <span className="invoice-badge invoice-badge--overdue">te laat</span>}
+                        {overdue && <span className="invoice-badge invoice-badge--overdue">Te laat</span>}
                       </td>
-                      <td>{r.invoice_date}</td>
+                      <td className="facturen-table__muted">{r.invoice_date}</td>
                       <td>{r.customer_name ?? "—"}</td>
-                      <td>{r.subject ?? "—"}</td>
+                      <td className="facturen-table__clip">{r.subject ?? "—"}</td>
                       <td>
                         <label className="invoice-toggle">
                           <input
@@ -94,7 +98,7 @@ export default function InvoiceListClient({ rows }: { rows: Row[] }) {
                               });
                             }}
                           />
-                          <span>{fmtDateTime(r.sent_at)}</span>
+                          <span className="facturen-table__muted">{fmtDateTime(r.sent_at)}</span>
                         </label>
                       </td>
                       <td>
@@ -111,15 +115,15 @@ export default function InvoiceListClient({ rows }: { rows: Row[] }) {
                               });
                             }}
                           />
-                          <span>{fmtDateTime(r.paid_at)}</span>
+                          <span className="facturen-table__muted">{fmtDateTime(r.paid_at)}</span>
                         </label>
                         {overdue && (
-                          <div style={{ marginTop: "0.35rem" }}>
+                          <div className="facturen-table__remind">
                             <a
                               href={`/beheer/facturen/${r.id}/herinnering.pdf`}
                               target="_blank"
                               rel="noreferrer"
-                              className="beheer-dashboard__link"
+                              className="facturen-table__link facturen-table__link--small"
                             >
                               Herinnering PDF
                             </a>
@@ -140,23 +144,47 @@ export default function InvoiceListClient({ rows }: { rows: Row[] }) {
   return (
     <>
       {error && (
-        <p className="beheer-dashboard__error" role="alert">
+        <p className="facturen-alert facturen-alert--error" role="alert">
           {error}
         </p>
       )}
 
-      <div className="invoice-search">
+      <div className="facturen-kpi">
+        <div className="facturen-kpi__card">
+          <span className="facturen-kpi__value">{totalAll}</span>
+          <span className="facturen-kpi__label">Totaal facturen</span>
+        </div>
+        <div className="facturen-kpi__card facturen-kpi__card--draft">
+          <span className="facturen-kpi__value">{concept.length}</span>
+          <span className="facturen-kpi__label">Concept</span>
+        </div>
+        <div className="facturen-kpi__card facturen-kpi__card--sent">
+          <span className="facturen-kpi__value">{sent.length}</span>
+          <span className="facturen-kpi__label">Openstaand</span>
+        </div>
+        <div className="facturen-kpi__card facturen-kpi__card--paid">
+          <span className="facturen-kpi__value">{paid.length}</span>
+          <span className="facturen-kpi__label">Betaald</span>
+        </div>
+      </div>
+
+      <div className="facturen-search">
+        <label className="facturen-search__label" htmlFor="facturen-zoek">
+          Zoeken
+        </label>
         <input
+          id="facturen-zoek"
+          className="facturen-search__input"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Zoeken op nummer, klant, onderwerp…"
-          aria-label="Zoeken"
+          placeholder="Nummer, datum, klant of onderwerp…"
+          aria-label="Zoeken in facturen"
         />
       </div>
 
-      {renderTable("Concept", concept)}
-      {renderTable("Verstuurd", sent)}
-      {renderTable("Betaald", paid)}
+      {renderTable("Concept", concept, "draft")}
+      {renderTable("Verstuurd (openstaand)", sent, "sent")}
+      {renderTable("Betaald", paid, "paid")}
     </>
   );
 }

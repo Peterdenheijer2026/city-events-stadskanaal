@@ -16,17 +16,25 @@ export default async function NieuweFactuurPage() {
   await assertTreasurer();
 
   return (
-    <div className="beheer-page">
-      <header className="beheer-page__header">
-        <h1>Nieuwe factuur</h1>
-        <div className="beheer-page__actions">
-          <Link href="/beheer/facturen">← Terug</Link>
-        </div>
-      </header>
+    <div className="beheer-page beheer-page--facturen">
+      <div className="facturen-app">
+        <header className="facturen-app__header">
+          <div className="facturen-app__title-block">
+            <p className="facturen-app__eyebrow">Financiën · Nieuw</p>
+            <h1 className="facturen-app__title">Nieuwe factuur</h1>
+            <p className="facturen-app__subtitle">Betaler, regels en bedragen invoeren</p>
+          </div>
+          <div className="facturen-app__toolbar">
+            <Link href="/beheer/facturen" className="facturen-btn facturen-btn--ghost">
+              ← Terug naar overzicht
+            </Link>
+          </div>
+        </header>
 
-      <main className="beheer-dashboard">
-        <InvoiceForm />
-      </main>
+        <main className="facturen-app__main">
+          <InvoiceForm />
+        </main>
+      </div>
     </div>
   );
 }

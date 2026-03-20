@@ -1453,6 +1453,506 @@ ul {
   }
 }
 
+/* ========== FACTUREN APP (boekhoud-look) ========== */
+.beheer-page--facturen {
+  padding: 0;
+  background: linear-gradient(180deg, #0d0f14 0%, var(--color-bg) 32%);
+}
+
+.facturen-app {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1.75rem 1.25rem 3rem;
+}
+
+@media (min-width: 768px) {
+  .facturen-app {
+    padding: 2rem 1.75rem 3.5rem;
+  }
+}
+
+.facturen-app__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.25rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.facturen-app__title-block {
+  min-width: min(100%, 28rem);
+}
+
+.facturen-app__eyebrow {
+  margin: 0 0 0.35rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.facturen-app__title {
+  margin: 0 0 0.35rem;
+  font-size: clamp(1.35rem, 2.5vw, 1.75rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--color-white);
+}
+
+.facturen-app__subtitle {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--color-gray);
+  max-width: 36rem;
+}
+
+.facturen-app__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.facturen-app__toolbar--wrap {
+  justify-content: flex-end;
+}
+
+.facturen-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.55rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border-radius: 8px;
+  text-decoration: none;
+  border: 1px solid transparent;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+}
+
+.facturen-btn--primary {
+  background: var(--color-orange);
+  color: #0d0d0d;
+  border-color: var(--color-orange);
+}
+
+.facturen-btn--primary:hover {
+  filter: brightness(1.06);
+}
+
+.facturen-btn--ghost {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.92);
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+.facturen-btn--ghost:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+.facturen-btn--danger {
+  background: rgba(244, 67, 54, 0.12);
+  color: #ffcdd2;
+  border-color: rgba(244, 67, 54, 0.45);
+}
+
+.facturen-btn--danger:hover:not(:disabled) {
+  background: rgba(244, 67, 54, 0.22);
+}
+
+.facturen-app__main {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.facturen-empty {
+  text-align: center;
+  padding: 3rem 1.5rem;
+  border-radius: 12px;
+  border: 1px dashed rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.facturen-empty__title {
+  margin: 0 0 0.5rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--color-white);
+}
+
+.facturen-empty__text {
+  margin: 0 0 1.25rem;
+  font-size: 0.9rem;
+  color: var(--color-gray);
+}
+
+.facturen-alert {
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+}
+
+.facturen-alert--error {
+  color: #ffcdd2;
+  background: rgba(244, 67, 54, 0.15);
+  border: 1px solid rgba(244, 67, 54, 0.35);
+}
+
+/* KPI-strip */
+.facturen-kpi {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+@media (min-width: 720px) {
+  .facturen-kpi {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.facturen-kpi__card {
+  padding: 1rem 1.1rem;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.facturen-kpi__card--draft {
+  border-left: 3px solid rgba(255, 193, 7, 0.5);
+}
+
+.facturen-kpi__card--sent {
+  border-left: 3px solid rgba(33, 150, 243, 0.55);
+}
+
+.facturen-kpi__card--paid {
+  border-left: 3px solid rgba(76, 175, 80, 0.55);
+}
+
+.facturen-kpi__value {
+  font-size: 1.65rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  color: var(--color-white);
+  line-height: 1.1;
+}
+
+.facturen-kpi__label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* Zoekbalk */
+.facturen-search {
+  margin-bottom: 1.5rem;
+}
+
+.facturen-search__label {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.45);
+  margin-bottom: 0.4rem;
+}
+
+.facturen-search__input {
+  width: 100%;
+  max-width: 520px;
+  padding: 0.65rem 0.85rem;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  color: var(--color-white);
+  font-family: inherit;
+  font-size: 0.9rem;
+}
+
+.facturen-search__input::placeholder {
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.facturen-search__input:focus {
+  outline: none;
+  border-color: rgba(255, 152, 0, 0.45);
+  box-shadow: 0 0 0 1px rgba(255, 152, 0, 0.2);
+}
+
+/* Secties */
+.facturen-section {
+  margin-bottom: 1.75rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.03);
+  overflow: hidden;
+}
+
+.facturen-section__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  background: rgba(0, 0, 0, 0.2);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.facturen-section__title {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.facturen-section__count {
+  min-width: 1.75rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.facturen-section__count--draft {
+  border-color: rgba(255, 193, 7, 0.35);
+  color: #ffe082;
+}
+
+.facturen-section__count--sent {
+  border-color: rgba(100, 181, 246, 0.4);
+  color: #90caf9;
+}
+
+.facturen-section__count--paid {
+  border-color: rgba(129, 199, 132, 0.45);
+  color: #a5d6a7;
+}
+
+.facturen-section__empty {
+  margin: 0;
+  padding: 1rem 1.25rem 1.25rem;
+  font-size: 0.875rem;
+  color: var(--color-gray);
+}
+
+.facturen-table-wrap {
+  overflow-x: auto;
+}
+
+.facturen-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.facturen-table thead th {
+  padding: 0.65rem 0.85rem;
+  text-align: left;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.45);
+  background: rgba(0, 0, 0, 0.25);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.facturen-table tbody td {
+  padding: 0.65rem 0.85rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  vertical-align: top;
+}
+
+.facturen-table tbody tr:nth-child(even) td {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.facturen-table tbody tr:hover td {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.facturen-table__link {
+  color: var(--color-orange);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.facturen-table__link:hover {
+  text-decoration: underline;
+}
+
+.facturen-table__link--small {
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.facturen-table__muted {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.facturen-table__num {
+  white-space: nowrap;
+}
+
+.facturen-table__clip {
+  max-width: 14rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.facturen-table__right {
+  text-align: right;
+}
+
+.facturen-table__strong {
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.facturen-table__remind {
+  margin-top: 0.35rem;
+}
+
+.facturen-table--numeric tbody td {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Detailpagina */
+.facturen-detail-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem 1rem;
+  margin-bottom: 1.5rem;
+  padding: 0.85rem 1rem;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.facturen-detail-meta__item {
+  font-size: 0.8125rem;
+  color: rgba(255, 255, 255, 0.65);
+}
+
+.facturen-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.facturen-pill--draft {
+  background: rgba(255, 193, 7, 0.15);
+  color: #ffe082;
+  border: 1px solid rgba(255, 193, 7, 0.35);
+}
+
+.facturen-pill--sent {
+  background: rgba(33, 150, 243, 0.15);
+  color: #90caf9;
+  border: 1px solid rgba(33, 150, 243, 0.35);
+}
+
+.facturen-pill--paid {
+  background: rgba(76, 175, 80, 0.2);
+  color: #a5d6a7;
+  border: 1px solid rgba(76, 175, 80, 0.4);
+}
+
+.facturen-panel {
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.03);
+  padding: 1.15rem 1.25rem;
+}
+
+.facturen-panel__h {
+  margin: 0 0 0.85rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.facturen-address {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+
+.facturen-address strong {
+  font-size: 1rem;
+  color: var(--color-white);
+}
+
+.facturen-totals-box {
+  margin-top: 1rem;
+  padding: 1rem 1.1rem;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.2);
+  max-width: 22rem;
+}
+
+/* Formulier in facturen-app */
+.facturen-form .invoice-form__section {
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.03);
+  padding: 1.15rem 1.25rem;
+}
+
+.facturen-form .invoice-form__section h2 {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.facturen-form .invoice-form__footer {
+  padding-top: 0.5rem;
+}
+
+.beheer-page--facturen .invoice-delete {
+  border: none;
+}
+
 /* ========== BEHEER PLEIN BEWERKEN ========== */
 .beheer-plein {
   max-width: 700px;

@@ -275,7 +275,7 @@ export default function InvoiceForm() {
   }
 
   return (
-    <form className="invoice-form" onSubmit={handleSubmit}>
+    <form className="invoice-form facturen-form" onSubmit={handleSubmit}>
       {error && (
         <p className="beheer-dashboard__error" role="alert">
           {error}
@@ -476,7 +476,7 @@ export default function InvoiceForm() {
       </section>
 
       <div className="invoice-form__footer">
-        <button type="submit" className="invoice-form__submit" disabled={pending}>
+        <button type="submit" className="invoice-form__submit facturen-btn facturen-btn--primary" disabled={pending}>
           {pending ? "Opslaan…" : "Factuur opslaan"}
         </button>
       </div>

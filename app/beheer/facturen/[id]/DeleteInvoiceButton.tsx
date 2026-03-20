@@ -26,7 +26,7 @@ export default function DeleteInvoiceButton({ id }: { id: string }) {
           });
         }}
         disabled={pending}
-        className="invoice-delete"
+        className="facturen-btn facturen-btn--danger invoice-delete"
       >
         {pending ? "Verwijderen…" : "Verwijderen"}
       </button>

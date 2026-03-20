@@ -41,83 +41,119 @@ export default async function FactuurDetailPage({
     { excl: 0, vat: 0, incl: 0 }
   );
 
+  const statusLabel =
+    invoice.paid_at != null ? "Betaald" : invoice.sent_at != null ? "Openstaand" : "Concept";
+  const statusTone = invoice.paid_at != null ? "paid" : invoice.sent_at != null ? "sent" : "draft";
+
   return (
-    <div className="beheer-page">
-      <header className="beheer-page__header">
-        <h1>Factuur {invoice.invoice_number}</h1>
-        <div className="beheer-page__actions">
-          <Link href="/beheer/facturen">← Terug</Link>
-          <a href={`/beheer/facturen/${id}/pdf`} target="_blank" rel="noreferrer">
-            Download PDF
-          </a>
-          <DeleteInvoiceButton id={id} />
+    <div className="beheer-page beheer-page--facturen">
+      <div className="facturen-app">
+        <header className="facturen-app__header">
+          <div className="facturen-app__title-block">
+            <p className="facturen-app__eyebrow">Financiën · Detail</p>
+            <h1 className="facturen-app__title">{invoice.invoice_number}</h1>
+            <p className="facturen-app__subtitle">
+              {invoice.invoice_date}
+              {invoice.subject ? ` · ${invoice.subject}` : ""}
+            </p>
+          </div>
+          <div className="facturen-app__toolbar facturen-app__toolbar--wrap">
+            <Link href="/beheer/facturen" className="facturen-btn facturen-btn--ghost">
+              ← Overzicht
+            </Link>
+            <a
+              href={`/beheer/facturen/${id}/pdf`}
+              target="_blank"
+              rel="noreferrer"
+              className="facturen-btn facturen-btn--primary"
+            >
+              PDF downloaden
+            </a>
+            <DeleteInvoiceButton id={id} />
+          </div>
+        </header>
+
+        <div className="facturen-detail-meta">
+          <span className={`facturen-pill facturen-pill--${statusTone}`}>{statusLabel}</span>
+          {invoice.sent_at && (
+            <span className="facturen-detail-meta__item">
+              Verstuurd: {new Date(invoice.sent_at).toLocaleString("nl-NL", { dateStyle: "short", timeStyle: "short" })}
+            </span>
+          )}
+          {invoice.paid_at && (
+            <span className="facturen-detail-meta__item">
+              Betaald: {new Date(invoice.paid_at).toLocaleString("nl-NL", { dateStyle: "short", timeStyle: "short" })}
+            </span>
+          )}
         </div>
-      </header>
 
-      <main className="beheer-dashboard">
-        <section className="invoice-form__section">
-          <h2>Factuur aan</h2>
-          <p className="beheer-dashboard__hint" style={{ marginBottom: 0 }}>
-            <strong>{customer.name}</strong>
-            <br />
-            {customer.street ? `${customer.street} ` : ""}
-            {customer.house_number ?? ""}{customer.house_number_addition ? ` ${customer.house_number_addition}` : ""}
-            <br />
-            {customer.postcode ?? ""} {customer.city ?? ""}
-            <br />
-            {customer.country}
-          </p>
-        </section>
+        <main className="facturen-app__main">
+          <section className="invoice-form__section facturen-panel">
+            <h2 className="facturen-panel__h">Betaler</h2>
+            <div className="facturen-address">
+              <strong>{customer.name}</strong>
+              <span>
+                {customer.street ? `${customer.street} ` : ""}
+                {customer.house_number ?? ""}
+                {customer.house_number_addition ? ` ${customer.house_number_addition}` : ""}
+              </span>
+              <span>
+                {customer.postcode ?? ""} {customer.city ?? ""}
+              </span>
+              {customer.country ? <span>{customer.country}</span> : null}
+            </div>
+          </section>
 
-        <section className="invoice-form__section">
-          <h2>Regels</h2>
-          <div className="beheer-dashboard__table-wrap">
-            <table className="beheer-dashboard__table">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Omschrijving</th>
-                  <th>Aantal</th>
-                  <th>BTW</th>
-                  <th>Excl.</th>
-                  <th>Incl.</th>
-                </tr>
-              </thead>
-              <tbody>
-                {lines.map((l) => {
-                  const excl = l.unit_price_excl * l.quantity;
-                  const incl = Math.round((excl * (1 + l.vat_rate) + Number.EPSILON) * 100) / 100;
-                  return (
-                    <tr key={l.position}>
-                      <td>{l.position}</td>
-                      <td>{l.description}</td>
-                      <td>{l.quantity}</td>
-                      <td>{Math.round(l.vat_rate * 100)}%</td>
-                      <td>{fmt(excl)}</td>
-                      <td>{fmt(incl)}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+          <section className="invoice-form__section facturen-panel">
+            <h2 className="facturen-panel__h">Factuurregels</h2>
+            <div className="facturen-table-wrap">
+              <table className="facturen-table facturen-table--numeric">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Omschrijving</th>
+                    <th className="facturen-table__right">Aantal</th>
+                    <th className="facturen-table__right">BTW</th>
+                    <th className="facturen-table__right">Excl.</th>
+                    <th className="facturen-table__right">Incl.</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {lines.map((l) => {
+                    const excl = l.unit_price_excl * l.quantity;
+                    const incl = Math.round((excl * (1 + l.vat_rate) + Number.EPSILON) * 100) / 100;
+                    return (
+                      <tr key={l.position}>
+                        <td className="facturen-table__muted">{l.position}</td>
+                        <td>{l.description}</td>
+                        <td className="facturen-table__right">{l.quantity}</td>
+                        <td className="facturen-table__right">{Math.round(l.vat_rate * 100)}%</td>
+                        <td className="facturen-table__right">{fmt(excl)}</td>
+                        <td className="facturen-table__right facturen-table__strong">{fmt(incl)}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
 
-          <div className="invoice-totals">
-            <div className="invoice-totals__row">
-              <span>Totaal excl.</span>
-              <strong>{fmt(totals.excl)}</strong>
+            <div className="invoice-totals facturen-totals-box">
+              <div className="invoice-totals__row">
+                <span>Totaal excl.</span>
+                <strong>{fmt(totals.excl)}</strong>
+              </div>
+              <div className="invoice-totals__row invoice-totals__row--sub">
+                <span>BTW</span>
+                <strong>{fmt(totals.vat)}</strong>
+              </div>
+              <div className="invoice-totals__row invoice-totals__row--grand">
+                <span>Totaal incl.</span>
+                <strong>{fmt(totals.incl)}</strong>
+              </div>
             </div>
-            <div className="invoice-totals__row invoice-totals__row--sub">
-              <span>BTW</span>
-              <strong>{fmt(totals.vat)}</strong>
-            </div>
-            <div className="invoice-totals__row invoice-totals__row--grand">
-              <span>Totaal incl.</span>
-              <strong>{fmt(totals.incl)}</strong>
-            </div>
-          </div>
-        </section>
-      </main>
+          </section>
+        </main>
+      </div>
     </div>
   );
 }
