@@ -6,7 +6,7 @@ import { revalidatePath } from "next/cache";
 import { getAppOrigin } from "@/lib/app-origin";
 import { loadInvoicePdfData } from "@/lib/invoice-pdf-data";
 import { buildInvoicePdfBuffer, STICHTING } from "@/lib/invoice-pdf";
-import { escapeHtml, sendInvoiceEmailResend } from "@/lib/send-invoice-email";
+import { escapeHtml, sendInvoiceEmail } from "@/lib/send-invoice-email";
 
 const TREASURER_EMAIL = "penningmeester@cityeventsstadskanaal.nl";
 
@@ -350,7 +350,7 @@ export async function sendInvoiceByEmail(invoiceId: string): Promise<{ error: st
 <p>Hierbij ontvangt u factuur <strong>${escapeHtml(num)}</strong> van ${escapeHtml(STICHTING.name)}.</p>
 <p>Met vriendelijke groet,<br/>${escapeHtml(STICHTING.name)}</p>`;
 
-    const sent = await sendInvoiceEmailResend({
+    const sent = await sendInvoiceEmail({
       to,
       subject: `Factuur ${num} – ${STICHTING.name}`,
       html,

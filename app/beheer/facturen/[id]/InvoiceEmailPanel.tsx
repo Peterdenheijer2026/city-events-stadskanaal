@@ -51,13 +51,14 @@ export default function InvoiceEmailPanel({
     <section className="invoice-form__section facturen-panel">
       <h2 className="facturen-panel__h">E-mail</h2>
       <p className="facturen-panel__intro">
-        Factuur als PDF versturen naar het e-mailadres van de betaler (via Resend). Na verzenden wordt de factuur
-        automatisch als <strong>verstuurd</strong> gemarkeerd.
+        Factuur als PDF versturen naar het e-mailadres van de betaler (via <strong>SMTP</strong> of Resend). Na
+        verzenden wordt de factuur automatisch als <strong>verstuurd</strong> gemarkeerd.
       </p>
       {!emailConfigured && (
         <p className="facturen-alert facturen-alert--warn" role="status">
-          E-mailverzending is nog niet geconfigureerd. Zet <code>RESEND_API_KEY</code> en <code>EMAIL_FROM</code> in{" "}
-          <code>.env.local</code> (zie documentatie bij de boekhouding).
+          E-mailverzending is nog niet geconfigureerd. Zet <code>EMAIL_FROM</code> plus SMTP (
+          <code>SMTP_HOST</code>, <code>SMTP_USER</code>, <code>SMTP_PASS</code>) of <code>RESEND_API_KEY</code> in{" "}
+          <code>.env.local</code> (zie <strong>BOEKHOUDING-SETUP.md</strong>).
         </p>
       )}
       {error && (
