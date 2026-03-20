@@ -6,21 +6,34 @@
  */
 import nodemailer from "nodemailer";
 
+/** Trim + verwijder per ongeluk mee-gekopieerde aanhalingstekens rond .env-waarden. */
+function envVal(v: string | undefined): string {
+  if (v == null) return "";
+  let s = v.trim();
+  if (
+    (s.startsWith('"') && s.endsWith('"')) ||
+    (s.startsWith("'") && s.endsWith("'"))
+  ) {
+    s = s.slice(1, -1).trim();
+  }
+  return s;
+}
+
 export function isSmtpConfigured(): boolean {
   return !!(
-    process.env.SMTP_HOST?.trim() &&
-    process.env.SMTP_USER?.trim() &&
-    process.env.SMTP_PASS?.trim()
+    envVal(process.env.SMTP_HOST) &&
+    envVal(process.env.SMTP_USER) &&
+    envVal(process.env.SMTP_PASS)
   );
 }
 
 export function isResendConfigured(): boolean {
-  return !!process.env.RESEND_API_KEY?.trim();
+  return !!envVal(process.env.RESEND_API_KEY);
 }
 
 /** True als er een afzender is én SMTP of Resend is ingevuld. */
 export function isInvoiceEmailConfigured(): boolean {
-  const from = process.env.EMAIL_FROM?.trim();
+  const from = envVal(process.env.EMAIL_FROM);
   if (!from) return false;
   return isSmtpConfigured() || isResendConfigured();
 }
@@ -52,22 +65,22 @@ export async function sendInvoiceEmail(
 async function sendViaSmtp(
   params: SendInvoiceEmailParams
 ): Promise<{ ok: true } | { ok: false; error: string }> {
-  const from = process.env.EMAIL_FROM?.trim();
+  const from = envVal(process.env.EMAIL_FROM);
   if (!from) {
     return { ok: false, error: "EMAIL_FROM ontbreekt." };
   }
 
-  const port = parseInt(process.env.SMTP_PORT || "587", 10);
-  const secureRaw = process.env.SMTP_SECURE?.trim().toLowerCase();
+  const port = parseInt(envVal(process.env.SMTP_PORT) || "587", 10);
+  const secureRaw = envVal(process.env.SMTP_SECURE).toLowerCase();
   const secure = secureRaw === "true" || secureRaw === "1" || port === 465;
 
   const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST!.trim(),
+    host: envVal(process.env.SMTP_HOST),
     port,
     secure,
     auth: {
-      user: process.env.SMTP_USER!.trim(),
-      pass: process.env.SMTP_PASS!.trim(),
+      user: envVal(process.env.SMTP_USER),
+      pass: envVal(process.env.SMTP_PASS),
     },
   });
 
@@ -95,8 +108,8 @@ async function sendViaSmtp(
 async function sendViaResend(
   params: SendInvoiceEmailParams
 ): Promise<{ ok: true } | { ok: false; error: string }> {
-  const key = process.env.RESEND_API_KEY?.trim();
-  const from = process.env.EMAIL_FROM?.trim();
+  const key = envVal(process.env.RESEND_API_KEY);
+  const from = envVal(process.env.EMAIL_FROM);
   if (!key || !from) {
     return {
       ok: false,

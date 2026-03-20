@@ -1521,6 +1521,81 @@ ul {
   justify-content: flex-end;
 }
 
+/* Tabbladen boekhouding (FinancienNav) */
+.financien-toolbar {
+  justify-content: space-between;
+  width: 100%;
+  max-width: 100%;
+}
+
+.financien-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  padding: 0.25rem;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.financien-tabs__tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 0.95rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  border-radius: 8px;
+  text-decoration: none;
+  color: rgba(255, 255, 255, 0.72);
+  border: 1px solid transparent;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+
+.financien-tabs__tab:hover {
+  color: var(--color-white);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.financien-tabs__tab.is-active {
+  background: var(--color-orange);
+  color: #0d0d0d;
+  border-color: var(--color-orange);
+}
+
+.financien-tabs__tab.is-active:hover {
+  filter: brightness(1.05);
+  color: #0d0d0d;
+}
+
+.financien-toolbar__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.financien-logout-form {
+  display: inline;
+  margin: 0;
+}
+
+@media (max-width: 720px) {
+  .financien-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .financien-tabs {
+    justify-content: center;
+  }
+
+  .financien-toolbar__actions {
+    justify-content: flex-end;
+  }
+}
+
 .facturen-btn {
   display: inline-flex;
   align-items: center;

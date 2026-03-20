@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
+const TREASURER_EMAIL = "penningmeester@cityeventsstadskanaal.nl";
+
 export default function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -37,9 +39,10 @@ export default function LoginForm() {
         if (error) throw error;
         setMessage({ type: "ok", text: "Controleer je e-mail voor de bevestigingslink." });
       } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        router.push("/beheer");
+        const isTreasurer = data.user?.email?.toLowerCase() === TREASURER_EMAIL;
+        router.push(isTreasurer ? "/beheer/boekhouding" : "/beheer");
         router.refresh();
       }
     } catch (err: unknown) {

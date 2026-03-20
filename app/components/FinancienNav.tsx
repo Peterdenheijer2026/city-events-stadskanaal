@@ -1,40 +1,63 @@
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 
 export type FinancienNavProps = {
-  /** Alleen op `/beheer/boekhouding` (hub): geen dubbele knop "Boekhouding" */
-  hub?: boolean;
   primaryAction?: { href: string; label: string };
   children?: ReactNode;
 };
 
+function activeTab(pathname: string): "boekhouding" | "debiteuren" | "crediteuren" {
+  if (pathname.startsWith("/beheer/boekhouding/crediteuren")) return "crediteuren";
+  if (pathname.startsWith("/beheer/boekhouding")) return "boekhouding";
+  if (pathname.startsWith("/beheer/facturen")) return "debiteuren";
+  return "boekhouding";
+}
+
 /**
- * Vaste navigatie tussen Beheer, Boekhouding, Debiteuren en Crediteuren.
- * Op de boekhouding-hub (`hub`) wordt alleen "Boekhouding" weggelaten als aparte link.
+ * Tab-navigatie tussen Boekhouding, Debiteuren en Crediteuren (actief tabblad gemarkeerd).
  */
-export function FinancienNav({ hub = false, primaryAction, children }: FinancienNavProps) {
+export function FinancienNav({ primaryAction, children }: FinancienNavProps) {
+  const pathname = usePathname() ?? "";
+  const tab = activeTab(pathname);
+
   return (
-    <div className="facturen-app__toolbar facturen-app__toolbar--wrap">
-      <Link href="/beheer" className="facturen-btn facturen-btn--ghost">
-        ← Beheer
-      </Link>
-      {!hub && (
-        <Link href="/beheer/boekhouding" className="facturen-btn facturen-btn--ghost">
+    <div className="facturen-app__toolbar financien-toolbar">
+      <nav className="financien-tabs" aria-label="Boekhouding">
+        <Link
+          href="/beheer/boekhouding"
+          className={`financien-tabs__tab${tab === "boekhouding" ? " is-active" : ""}`}
+        >
           Boekhouding
         </Link>
-      )}
-      <Link href="/beheer/facturen" className="facturen-btn facturen-btn--ghost">
-        Debiteuren
-      </Link>
-      <Link href="/beheer/boekhouding/crediteuren" className="facturen-btn facturen-btn--ghost">
-        Crediteuren
-      </Link>
-      {primaryAction && (
-        <Link href={primaryAction.href} className="facturen-btn facturen-btn--primary">
-          {primaryAction.label}
+        <Link
+          href="/beheer/facturen"
+          className={`financien-tabs__tab${tab === "debiteuren" ? " is-active" : ""}`}
+        >
+          Debiteuren
         </Link>
-      )}
-      {children}
+        <Link
+          href="/beheer/boekhouding/crediteuren"
+          className={`financien-tabs__tab${tab === "crediteuren" ? " is-active" : ""}`}
+        >
+          Crediteuren
+        </Link>
+      </nav>
+      <div className="financien-toolbar__actions">
+        {primaryAction && (
+          <Link href={primaryAction.href} className="facturen-btn facturen-btn--primary">
+            {primaryAction.label}
+          </Link>
+        )}
+        {children}
+        <form action="/beheer/logout" method="post" className="financien-logout-form">
+          <button type="submit" className="facturen-btn facturen-btn--ghost facturen-btn--tiny">
+            Uitloggen
+          </button>
+        </form>
+      </div>
     </div>
   );
 }

@@ -8,6 +8,8 @@ import InvoiceEmailPanel from "./InvoiceEmailPanel";
 
 const TREASURER_EMAIL = "penningmeester@cityeventsstadskanaal.nl";
 
+export const dynamic = "force-dynamic";
+
 async function assertTreasurer() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();

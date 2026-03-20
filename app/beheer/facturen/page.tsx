@@ -8,6 +8,9 @@ import InvoiceListClient from "./InvoiceListClient";
 
 const TREASURER_EMAIL = "penningmeester@cityeventsstadskanaal.nl";
 
+/** Altijd env opnieuw lezen (o.a. SMTP op Vercel / na wijziging .env.local). */
+export const dynamic = "force-dynamic";
+
 async function isTreasurer() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();

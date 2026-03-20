@@ -40,7 +40,7 @@ export default async function BoekhoudingPage() {
               Overzicht van geldstromen: debiteuren, crediteuren en mutaties per maand.
             </p>
           </div>
-          <FinancienNav hub />
+          <FinancienNav />
         </header>
 
         <main className="facturen-app__main">

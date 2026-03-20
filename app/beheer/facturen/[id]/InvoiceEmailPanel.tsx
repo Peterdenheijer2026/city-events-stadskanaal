@@ -56,9 +56,12 @@ export default function InvoiceEmailPanel({
       </p>
       {!emailConfigured && (
         <p className="facturen-alert facturen-alert--warn" role="status">
-          E-mailverzending is nog niet geconfigureerd. Zet <code>EMAIL_FROM</code> plus SMTP (
-          <code>SMTP_HOST</code>, <code>SMTP_USER</code>, <code>SMTP_PASS</code>) of <code>RESEND_API_KEY</code> in{" "}
-          <code>.env.local</code> (zie <strong>BOEKHOUDING-SETUP.md</strong>).
+          <strong>Lokaal:</strong> zet <code>EMAIL_FROM</code> plus SMTP (<code>SMTP_HOST</code>,{" "}
+          <code>SMTP_USER</code>, <code>SMTP_PASS</code>) in <code>.env.local</code> in de projectmap en herstart{" "}
+          <code>npm run dev</code>.<br />
+          <strong>Live (Vercel):</strong> hetzelfde toevoegen onder Project → <strong>Settings</strong> →{" "}
+          <strong>Environment Variables</strong> — <code>.env.local</code> wordt niet mee gepusht.<br />
+          Zie <strong>BOEKHOUDING-SETUP.md</strong>.
         </p>
       )}
       {error && (

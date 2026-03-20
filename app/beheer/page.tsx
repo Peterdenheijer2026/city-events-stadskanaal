@@ -17,6 +17,10 @@ export default async function BeheerPage() {
   const isSuperAdminByEmail = user.email?.toLowerCase() === SUPER_ADMIN_EMAIL;
   const isTreasurer = user.email?.toLowerCase() === TREASURER_EMAIL;
 
+  if (isTreasurer) {
+    redirect("/beheer/boekhouding");
+  }
+
   let profile: { is_super_admin: boolean } | null = null;
   let permissions: { plein_slug: string }[] = [];
   let allProfiles: { id: string; email: string; is_super_admin: boolean }[] = [];
