@@ -2,7 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { listPurchaseInvoices } from "../actions";
-import InkomendeClient from "./InkomendeClient";
+import CrediteurenClient from "./CrediteurenClient";
 
 const TREASURER_EMAIL = "penningmeester@cityeventsstadskanaal.nl";
 
@@ -15,7 +15,7 @@ async function assertTreasurerPage() {
   if (user.email?.toLowerCase() !== TREASURER_EMAIL) redirect("/beheer/no-access");
 }
 
-export default async function InkomendeFacturenPage() {
+export default async function CrediteurenPage() {
   await assertTreasurerPage();
 
   let rows: Awaited<ReturnType<typeof listPurchaseInvoices>> = [];
@@ -30,10 +30,10 @@ export default async function InkomendeFacturenPage() {
       <div className="facturen-app">
         <header className="facturen-app__header">
           <div className="facturen-app__title-block">
-            <p className="facturen-app__eyebrow">Financiën · Inkomend</p>
-            <h1 className="facturen-app__title">Inkomende facturen</h1>
+            <p className="facturen-app__eyebrow">Financiën · Crediteuren</p>
+            <h1 className="facturen-app__title">Crediteuren</h1>
             <p className="facturen-app__subtitle">
-              PDF uploaden, bedrag registreren en betalingen bijhouden (nog te betalen aan leveranciers).
+              Facturen van leveranciers: PDF, bedragen en betalingen bijhouden.
             </p>
           </div>
           <div className="facturen-app__toolbar facturen-app__toolbar--wrap">
@@ -41,13 +41,13 @@ export default async function InkomendeFacturenPage() {
               ← Boekhouding
             </Link>
             <Link href="/beheer/facturen" className="facturen-btn facturen-btn--ghost">
-              Uitgaande facturen
+              Debiteuren
             </Link>
           </div>
         </header>
 
         <main className="facturen-app__main">
-          <InkomendeClient initialRows={rows} />
+          <CrediteurenClient initialRows={rows} />
         </main>
       </div>
     </div>

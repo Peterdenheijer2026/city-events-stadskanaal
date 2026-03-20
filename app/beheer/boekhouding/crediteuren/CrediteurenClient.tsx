@@ -7,7 +7,7 @@ function eur(n: number) {
   return n.toLocaleString("nl-NL", { style: "currency", currency: "EUR" });
 }
 
-export default function InkomendeClient({ initialRows }: { initialRows: PurchaseRow[] }) {
+export default function CrediteurenClient({ initialRows }: { initialRows: PurchaseRow[] }) {
   const [rows, setRows] = useState(initialRows);
   const [pending, startTransition] = useTransition();
   const [formError, setFormError] = useState<string | null>(null);
@@ -79,7 +79,7 @@ export default function InkomendeClient({ initialRows }: { initialRows: Purchase
                     <td>
                       {r.file_path ? (
                         <a
-                          href={`/beheer/boekhouding/inkomende/${r.id}/download`}
+                          href={`/beheer/boekhouding/crediteuren/${r.id}/download`}
                           className="facturen-table__link facturen-table__link--small"
                           target="_blank"
                           rel="noreferrer"
@@ -111,7 +111,7 @@ export default function InkomendeClient({ initialRows }: { initialRows: Purchase
                         className="facturen-btn facturen-btn--danger facturen-btn--tiny"
                         disabled={pending}
                         onClick={() => {
-                          if (!confirm("Deze inkomende factuur verwijderen?")) return;
+                          if (!confirm("Dit crediteurenitem verwijderen?")) return;
                           startTransition(async () => {
                             await deletePurchaseInvoice(r.id);
                             refresh();
@@ -140,11 +140,11 @@ export default function InkomendeClient({ initialRows }: { initialRows: Purchase
       )}
 
       <section className="invoice-form__section facturen-panel boekhoud-form-card">
-        <h2 className="facturen-panel__h">Nieuwe inkomende factuur (te betalen)</h2>
+        <h2 className="facturen-panel__h">Nieuw crediteurenitem (te betalen)</h2>
         <p className="boekhoud-form-card__intro">
           Vul leverancier en bedrag in. PDF uploaden is optioneel maar aanbevolen voor je administratie. Markeer later wanneer betaald is.
         </p>
-        <form onSubmit={onSubmit} className="boekhoud-inkomend-form facturen-form">
+        <form onSubmit={onSubmit} className="boekhoud-crediteuren-form facturen-form">
           <div className="invoice-form__grid">
             <label>
               Leverancier *
@@ -192,11 +192,11 @@ export default function InkomendeClient({ initialRows }: { initialRows: Purchase
       </section>
 
       <div className="facturen-search">
-        <label className="facturen-search__label" htmlFor="inkomende-zoek">
+        <label className="facturen-search__label" htmlFor="crediteuren-zoek">
           Zoeken
         </label>
         <input
-          id="inkomende-zoek"
+          id="crediteuren-zoek"
           className="facturen-search__input"
           value={query}
           onChange={(e) => setQuery(e.target.value)}

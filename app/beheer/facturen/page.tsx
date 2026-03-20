@@ -23,9 +23,9 @@ export default async function FacturenPage() {
       <div className="facturen-app">
         <header className="facturen-app__header">
           <div className="facturen-app__title-block">
-            <p className="facturen-app__eyebrow">Financiën · Uitgaand</p>
-            <h1 className="facturen-app__title">Uitgaande facturen</h1>
-            <p className="facturen-app__subtitle">Naar betalers: overzicht, status en betalingen</p>
+            <p className="facturen-app__eyebrow">Financiën · Debiteuren</p>
+            <h1 className="facturen-app__title">Debiteuren</h1>
+            <p className="facturen-app__subtitle">Openstaande vorderingen: overzicht, status en betalingen</p>
           </div>
           <div className="facturen-app__toolbar">
             <Link href="/beheer" className="facturen-btn facturen-btn--ghost">
@@ -43,10 +43,10 @@ export default async function FacturenPage() {
         <main className="facturen-app__main">
           {rows.length === 0 ? (
             <div className="facturen-empty">
-              <p className="facturen-empty__title">Nog geen facturen</p>
-              <p className="facturen-empty__text">Maak je eerste factuur aan om te beginnen.</p>
+              <p className="facturen-empty__title">Nog geen debiteuren</p>
+              <p className="facturen-empty__text">Maak je eerste debiteurfactuur aan om te beginnen.</p>
               <Link href="/beheer/facturen/nieuw" className="facturen-btn facturen-btn--primary">
-                Nieuwe factuur
+                Nieuwe debiteurfactuur
               </Link>
             </div>
           ) : (

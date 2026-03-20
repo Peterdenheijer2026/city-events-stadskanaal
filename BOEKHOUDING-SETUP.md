@@ -1,4 +1,4 @@
-# Boekhouding-module (inkomende facturen + overzicht)
+# Boekhouding-module (debiteuren + crediteuren)
 
 ## Supabase
 
@@ -7,13 +7,13 @@
    (Public uit, File size limit bijv. 15 MB).
 3. Voer **015_storage_purchase_invoices.sql** uit (rechten voor penningmeester + super admin).
 
-Zonder bucket mislukt uploaden van PDF’s bij **inkomende facturen**; de rest van de boekhoudpagina’s werkt wel.
+Zonder bucket mislukt uploaden van PDF’s bij **crediteuren**; de rest van de boekhoudpagina’s werkt wel.
 
 ## Wat er bij komt
 
-- **`/beheer/boekhouding`** – Overzicht: te ontvangen (debiteuren), te betalen (crediteuren), netto, YTD betaald uitgaand/inkomend, tabel per maand.
-- **`/beheer/boekhouding/inkomende`** – Inkomende facturen registreren (optioneel PDF), markeren als betaald, verwijderen.
+- **`/beheer/boekhouding`** – Overzicht: te ontvangen (debiteuren), te betalen (crediteuren), netto, YTD betaald, tabel per maand.
+- **`/beheer/boekhouding/crediteuren`** – Crediteuren registreren (optioneel PDF), markeren als betaald, verwijderen.
 
-Oude URL **`/beheer/boekhouding/inkoop`** wordt automatisch doorgestuurd naar **`/beheer/boekhouding/inkomende`**.
+Oude URL’s **`/beheer/boekhouding/inkoop`** en **`/beheer/boekhouding/inkomende`** worden automatisch doorgestuurd naar **`/beheer/boekhouding/crediteuren`**.
 
-Alleen **penningmeester@cityeventsstadskanaal.nl** (en super admin) hebben toegang, gelijk aan de uitgaande facturen.
+Alleen **penningmeester@cityeventsstadskanaal.nl** (en super admin) hebben toegang, gelijk aan **debiteuren** (`/beheer/facturen`).

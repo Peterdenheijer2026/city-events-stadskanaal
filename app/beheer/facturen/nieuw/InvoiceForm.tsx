@@ -367,7 +367,7 @@ export default function InvoiceForm() {
       </section>
 
       <section className="invoice-form__section">
-        <h2>Uitgaande factuur</h2>
+        <h2>Debiteurfactuur</h2>
         <div className="invoice-form__grid">
           <label>
             Datum
@@ -477,7 +477,7 @@ export default function InvoiceForm() {
 
       <div className="invoice-form__footer">
         <button type="submit" className="invoice-form__submit facturen-btn facturen-btn--primary" disabled={pending}>
-          {pending ? "Opslaan…" : "Uitgaande factuur opslaan"}
+          {pending ? "Opslaan…" : "Debiteurfactuur opslaan"}
         </button>
       </div>
     </form>

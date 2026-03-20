@@ -24,7 +24,7 @@ export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> 
   if (dlErr || !blob) return new Response("Bestand niet gevonden", { status: 404 });
 
   const buf = await blob.arrayBuffer();
-  const name = (row.file_name && row.file_name.endsWith(".pdf") ? row.file_name : `${row.file_name || "inkomend"}.pdf`).replace(
+  const name = (row.file_name && row.file_name.endsWith(".pdf") ? row.file_name : `${row.file_name || "crediteur"}.pdf`).replace(
     /[^\w.\- ()]/g,
     "_"
   );

@@ -37,7 +37,7 @@ export default async function BoekhoudingPage() {
             <p className="facturen-app__eyebrow">Financiën</p>
             <h1 className="facturen-app__title">Boekhouding</h1>
             <p className="facturen-app__subtitle">
-              Overzicht van geldstromen: openstaande vorderingen, te betalen inkomende facturen, en mutaties per maand.
+              Overzicht van geldstromen: debiteuren, crediteuren en mutaties per maand.
             </p>
           </div>
           <div className="facturen-app__toolbar facturen-app__toolbar--wrap">
@@ -45,10 +45,10 @@ export default async function BoekhoudingPage() {
               ← Beheer
             </Link>
             <Link href="/beheer/facturen" className="facturen-btn facturen-btn--ghost">
-              Uitgaande facturen
+              Debiteuren
             </Link>
-            <Link href="/beheer/boekhouding/inkomende" className="facturen-btn facturen-btn--primary">
-              Inkomende facturen
+            <Link href="/beheer/boekhouding/crediteuren" className="facturen-btn facturen-btn--primary">
+              Crediteuren
             </Link>
           </div>
         </header>
@@ -72,12 +72,12 @@ export default async function BoekhoudingPage() {
                 <div className="boekhoud-kpi__card boekhoud-kpi__card--in">
                   <span className="boekhoud-kpi__label">Te ontvangen (debiteuren)</span>
                   <span className="boekhoud-kpi__value">{eur(summary.debiteurenOpen)}</span>
-                  <span className="boekhoud-kpi__hint">Uitgaande facturen verstuurd, nog niet betaald</span>
+                  <span className="boekhoud-kpi__hint">Facturen verstuurd, nog niet betaald</span>
                 </div>
                 <div className="boekhoud-kpi__card boekhoud-kpi__card--out">
                   <span className="boekhoud-kpi__label">Te betalen (crediteuren)</span>
                   <span className="boekhoud-kpi__value">{eur(summary.crediteurenOpen)}</span>
-                  <span className="boekhoud-kpi__hint">Inkomende facturen nog niet voldaan</span>
+                  <span className="boekhoud-kpi__hint">Nog niet voldaan aan leveranciers</span>
                 </div>
                 <div className="boekhoud-kpi__card boekhoud-kpi__card--net">
                   <span className="boekhoud-kpi__label">Netto (openstaand)</span>
@@ -87,10 +87,10 @@ export default async function BoekhoudingPage() {
                 <div className="boekhoud-kpi__card boekhoud-kpi__card--ytd">
                   <span className="boekhoud-kpi__label">Dit jaar betaald</span>
                   <span className="boekhoud-kpi__sub">
-                    Uitgaand: <strong>{eur(summary.uitgaandBetaaldYtd)}</strong>
+                    Debiteuren: <strong>{eur(summary.debiteurenBetaaldYtd)}</strong>
                   </span>
                   <span className="boekhoud-kpi__sub">
-                    Inkomend: <strong>{eur(summary.inkomendBetaaldYtd)}</strong>
+                    Crediteuren: <strong>{eur(summary.crediteurenBetaaldYtd)}</strong>
                   </span>
                 </div>
               </div>
@@ -98,15 +98,15 @@ export default async function BoekhoudingPage() {
               <section className="boekhoud-section">
                 <h2 className="boekhoud-section__title">Mutaties per maand (betaald)</h2>
                 <p className="boekhoud-section__intro">
-                  Gebaseerd op de datum waarop een uitgaande factuur als betaald is gezet, en op de betaaldatum van inkomende facturen.
+                  Gebaseerd op de betaaldatum bij debiteuren (ontvangen) en bij crediteuren (betaald aan leveranciers).
                 </p>
                 <div className="facturen-table-wrap">
                   <table className="facturen-table facturen-table--numeric">
                     <thead>
                       <tr>
                         <th>Periode</th>
-                        <th className="facturen-table__right">Uitgaand ontvangen</th>
-                        <th className="facturen-table__right">Inkomend betaald</th>
+                        <th className="facturen-table__right">Debiteuren ontvangen</th>
+                        <th className="facturen-table__right">Crediteuren betaald</th>
                         <th className="facturen-table__right">Netto</th>
                       </tr>
                     </thead>
@@ -114,8 +114,8 @@ export default async function BoekhoudingPage() {
                       {summary.maandOverzicht.map((m) => (
                         <tr key={m.maandKey}>
                           <td>{m.maandLabel}</td>
-                          <td className="facturen-table__right">{eur(m.uitgaandBetaald)}</td>
-                          <td className="facturen-table__right">{eur(m.inkomendBetaald)}</td>
+                          <td className="facturen-table__right">{eur(m.debiteurenBetaald)}</td>
+                          <td className="facturen-table__right">{eur(m.crediteurenBetaald)}</td>
                           <td className="facturen-table__right facturen-table__strong">{eur(m.netto)}</td>
                         </tr>
                       ))}

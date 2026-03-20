@@ -20,8 +20,8 @@ export default async function NieuweFactuurPage() {
       <div className="facturen-app">
         <header className="facturen-app__header">
           <div className="facturen-app__title-block">
-            <p className="facturen-app__eyebrow">Financiën · Uitgaand · Nieuw</p>
-            <h1 className="facturen-app__title">Nieuwe uitgaande factuur</h1>
+            <p className="facturen-app__eyebrow">Financiën · Debiteuren · Nieuw</p>
+            <h1 className="facturen-app__title">Nieuwe debiteurfactuur</h1>
             <p className="facturen-app__subtitle">Betaler, regels en bedragen invoeren</p>
           </div>
           <div className="facturen-app__toolbar">

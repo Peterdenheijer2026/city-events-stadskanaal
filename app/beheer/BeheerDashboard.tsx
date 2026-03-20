@@ -83,17 +83,17 @@ export default function BeheerDashboard({
         <section className="beheer-dashboard__section">
           <h2>Boekhouding</h2>
           <p className="beheer-dashboard__hint">
-            Uitgaande en inkomende facturen, PDF-upload, en overzicht geldstromen.
+            Debiteuren en crediteuren, PDF-upload, en overzicht geldstromen.
           </p>
           <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", alignItems: "flex-start" }}>
             <Link href="/beheer/boekhouding" className="beheer-dashboard__link">
               Boekhoud-overzicht
             </Link>
             <Link href="/beheer/facturen" className="beheer-dashboard__link">
-              Uitgaande facturen
+              Debiteuren
             </Link>
-            <Link href="/beheer/boekhouding/inkomende" className="beheer-dashboard__link">
-              Inkomende facturen
+            <Link href="/beheer/boekhouding/crediteuren" className="beheer-dashboard__link">
+              Crediteuren
             </Link>
           </div>
         </section>

@@ -1,5 +1,5 @@
 -- =============================================================================
--- CITY EVENTS – Facturen + boekhouding (uitgaande + inkomende facturen)
+-- CITY EVENTS – Debiteuren + crediteuren (boekhouding)
 -- Plak dit in Supabase: Dashboard → SQL Editor → New query → Run
 -- Volgorde: 011 → 012 → 013 → 014 → daarna bucket aanmaken → 015
 -- =============================================================================
@@ -133,7 +133,7 @@ alter table public.invoices
 create index if not exists invoices_sent_at_idx on public.invoices(sent_at);
 create index if not exists invoices_paid_at_idx on public.invoices(paid_at);
 
--- ---------- 014: inkomende facturen (purchase_invoices) ----------
+-- ---------- 014: crediteuren (purchase_invoices) ----------
 create table if not exists public.purchase_invoices (
   id uuid primary key default gen_random_uuid(),
   supplier_name text not null,

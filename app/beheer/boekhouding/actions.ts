@@ -28,22 +28,22 @@ function sumInvoiceLines(lines: { unit_price_excl: number; quantity: number; vat
 }
 
 export type BookkeepingSummary = {
-  /** Uitgaande facturen: nog te ontvangen (verstuurd, niet betaald) */
+  /** Debiteuren: nog te ontvangen (verstuurd, niet betaald) */
   debiteurenOpen: number;
-  /** Inkomende facturen: nog te betalen */
+  /** Crediteuren: nog te betalen */
   crediteurenOpen: number;
   /** debiteurenOpen - crediteurenOpen */
   nettoLiquide: number;
-  /** Uitgaand YTD betaald (dit kalenderjaar) */
-  uitgaandBetaaldYtd: number;
-  /** Inkomend YTD betaald */
-  inkomendBetaaldYtd: number;
+  /** Debiteuren YTD betaald (dit kalenderjaar) */
+  debiteurenBetaaldYtd: number;
+  /** Crediteuren YTD betaald */
+  crediteurenBetaaldYtd: number;
   /** Per maand laatste 6 maanden */
   maandOverzicht: {
     maandKey: string;
     maandLabel: string;
-    uitgaandBetaald: number;
-    inkomendBetaald: number;
+    debiteurenBetaald: number;
+    crediteurenBetaald: number;
     netto: number;
   }[];
 };
@@ -93,17 +93,17 @@ export async function getBookkeepingSummary(): Promise<BookkeepingSummary> {
     .gte("paid_at", fromIso);
   if (e3) throw e3;
 
-  let uitgaandBetaaldYtd = 0;
-  const uitgaandPerMonth: Record<string, number> = {};
+  let debiteurenBetaaldYtd = 0;
+  const debiteurenPerMonth: Record<string, number> = {};
   for (const inv of paidInv ?? []) {
     const lines = (inv as { invoice_lines?: { unit_price_excl: number; quantity: number; vat_rate: number }[] }).invoice_lines ?? [];
     const tot = sumInvoiceLines(lines);
     const paidAt = new Date((inv as { paid_at: string }).paid_at);
-    if (paidAt >= yearStart) uitgaandBetaaldYtd += tot;
+    if (paidAt >= yearStart) debiteurenBetaaldYtd += tot;
     const k = monthKey(paidAt);
-    uitgaandPerMonth[k] = (uitgaandPerMonth[k] ?? 0) + tot;
+    debiteurenPerMonth[k] = (debiteurenPerMonth[k] ?? 0) + tot;
   }
-  uitgaandBetaaldYtd = Math.round((uitgaandBetaaldYtd + Number.EPSILON) * 100) / 100;
+  debiteurenBetaaldYtd = Math.round((debiteurenBetaaldYtd + Number.EPSILON) * 100) / 100;
 
   const { data: paidPur, error: e4 } = await supabase
     .from("purchase_invoices")
@@ -112,28 +112,28 @@ export async function getBookkeepingSummary(): Promise<BookkeepingSummary> {
     .gte("paid_at", fromIso);
   if (e4) throw e4;
 
-  let inkomendBetaaldYtd = 0;
-  const inkomendPerMonth: Record<string, number> = {};
+  let crediteurenBetaaldYtd = 0;
+  const crediteurenPerMonth: Record<string, number> = {};
   for (const p of paidPur ?? []) {
     const a = Number(p.amount_incl ?? 0);
     const paid = new Date(p.paid_at!);
-    if (paid >= yearStart) inkomendBetaaldYtd += a;
+    if (paid >= yearStart) crediteurenBetaaldYtd += a;
     const k = monthKey(paid);
-    inkomendPerMonth[k] = (inkomendPerMonth[k] ?? 0) + a;
+    crediteurenPerMonth[k] = (crediteurenPerMonth[k] ?? 0) + a;
   }
-  inkomendBetaaldYtd = Math.round((inkomendBetaaldYtd + Number.EPSILON) * 100) / 100;
+  crediteurenBetaaldYtd = Math.round((crediteurenBetaaldYtd + Number.EPSILON) * 100) / 100;
 
   const maandOverzicht: BookkeepingSummary["maandOverzicht"] = [];
   for (let i = 5; i >= 0; i--) {
     const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
     const k = monthKey(d);
-    const v = Math.round(((uitgaandPerMonth[k] ?? 0) + Number.EPSILON) * 100) / 100;
-    const ink = Math.round(((inkomendPerMonth[k] ?? 0) + Number.EPSILON) * 100) / 100;
+    const v = Math.round(((debiteurenPerMonth[k] ?? 0) + Number.EPSILON) * 100) / 100;
+    const ink = Math.round(((crediteurenPerMonth[k] ?? 0) + Number.EPSILON) * 100) / 100;
     maandOverzicht.push({
       maandKey: k,
       maandLabel: monthLabel(d),
-      uitgaandBetaald: v,
-      inkomendBetaald: ink,
+      debiteurenBetaald: v,
+      crediteurenBetaald: ink,
       netto: Math.round((v - ink + Number.EPSILON) * 100) / 100,
     });
   }
@@ -142,8 +142,8 @@ export async function getBookkeepingSummary(): Promise<BookkeepingSummary> {
     debiteurenOpen,
     crediteurenOpen,
     nettoLiquide: Math.round((debiteurenOpen - crediteurenOpen + Number.EPSILON) * 100) / 100,
-    uitgaandBetaaldYtd,
-    inkomendBetaaldYtd,
+    debiteurenBetaaldYtd,
+    crediteurenBetaaldYtd,
     maandOverzicht,
   };
 }
@@ -236,7 +236,7 @@ export async function createPurchaseInvoice(formData: FormData): Promise<{ id: s
     }
 
     revalidatePath("/beheer/boekhouding");
-    revalidatePath("/beheer/boekhouding/inkomende");
+    revalidatePath("/beheer/boekhouding/crediteuren");
     return { id: row.id, error: null };
   } catch (e) {
     return { id: null, error: e instanceof Error ? e.message : "Opslaan mislukt." };
@@ -252,7 +252,7 @@ export async function setPurchasePaid(id: string, paid: boolean): Promise<{ erro
       .eq("id", id);
     if (error) return { error: error.message };
     revalidatePath("/beheer/boekhouding");
-    revalidatePath("/beheer/boekhouding/inkomende");
+    revalidatePath("/beheer/boekhouding/crediteuren");
     return { error: null };
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Opslaan mislukt." };
@@ -267,7 +267,7 @@ export async function deletePurchaseInvoice(id: string): Promise<{ error: string
     if (error) return { error: error.message };
     if (row?.file_path) await supabase.storage.from(BUCKET).remove([row.file_path]);
     revalidatePath("/beheer/boekhouding");
-    revalidatePath("/beheer/boekhouding/inkomende");
+    revalidatePath("/beheer/boekhouding/crediteuren");
     return { error: null };
   } catch (e) {
     return { error: e instanceof Error ? e.message : "Verwijderen mislukt." };

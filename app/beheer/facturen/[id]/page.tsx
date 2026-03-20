@@ -50,7 +50,7 @@ export default async function FactuurDetailPage({
       <div className="facturen-app">
         <header className="facturen-app__header">
           <div className="facturen-app__title-block">
-            <p className="facturen-app__eyebrow">Financiën · Uitgaand · Detail</p>
+            <p className="facturen-app__eyebrow">Financiën · Debiteuren · Detail</p>
             <h1 className="facturen-app__title">{invoice.invoice_number}</h1>
             <p className="facturen-app__subtitle">
               {invoice.invoice_date}

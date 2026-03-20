@@ -15,10 +15,10 @@ Open in je project:
 
 | Bestand | Inhoud |
 |--------|--------|
-| `011_invoices.sql` | Tabellen uitgaande facturen |
+| `011_invoices.sql` | Tabellen debiteuren (facturen naar betalers) |
 | `012_invoices_treasurer_access.sql` | RLS penningmeester |
 | `013_invoices_status_fields.sql` | `sent_at` / `paid_at` |
-| `014_purchase_invoices.sql` | Tabel inkomende facturen |
+| `014_purchase_invoices.sql` | Tabel crediteuren (`purchase_invoices`) |
 | `015_storage_purchase_invoices.sql` | Storage-rechten (bucket `purchase-invoices` vereist) |
 
 Volgorde: **011 → 012 → 013 → 014 → bucket aanmaken → 015**.
