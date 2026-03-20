@@ -35,7 +35,7 @@ export default function InvoiceListClient({ rows }: { rows: Row[] }) {
     );
   }, [rows, query]);
 
-  const concept = filtered.filter((r) => !r.sent_at && !r.paid_at);
+  const onverstuurd = filtered.filter((r) => !r.sent_at && !r.paid_at);
   const sent = filtered.filter((r) => !!r.sent_at && !r.paid_at);
   const paid = filtered.filter((r) => !!r.paid_at);
   const totalAll = filtered.length;
@@ -47,7 +47,7 @@ export default function InvoiceListClient({ rows }: { rows: Row[] }) {
     return d.toLocaleString("nl-NL", { dateStyle: "short", timeStyle: "short" });
   }
 
-  function renderTable(title: string, items: Row[], tone: "draft" | "sent" | "paid") {
+  function renderTable(title: string, items: Row[], tone: "unsent" | "sent" | "paid") {
     return (
       <section className="facturen-section">
         <div className="facturen-section__head">
@@ -154,9 +154,9 @@ export default function InvoiceListClient({ rows }: { rows: Row[] }) {
           <span className="facturen-kpi__value">{totalAll}</span>
           <span className="facturen-kpi__label">Totaal facturen</span>
         </div>
-        <div className="facturen-kpi__card facturen-kpi__card--draft">
-          <span className="facturen-kpi__value">{concept.length}</span>
-          <span className="facturen-kpi__label">Concept</span>
+        <div className="facturen-kpi__card facturen-kpi__card--unsent">
+          <span className="facturen-kpi__value">{onverstuurd.length}</span>
+          <span className="facturen-kpi__label">Onverstuurd</span>
         </div>
         <div className="facturen-kpi__card facturen-kpi__card--sent">
           <span className="facturen-kpi__value">{sent.length}</span>
@@ -182,7 +182,7 @@ export default function InvoiceListClient({ rows }: { rows: Row[] }) {
         />
       </div>
 
-      {renderTable("Concept", concept, "draft")}
+      {renderTable("Onverstuurd", onverstuurd, "unsent")}
       {renderTable("Verstuurd (openstaand)", sent, "sent")}
       {renderTable("Betaald", paid, "paid")}
     </>

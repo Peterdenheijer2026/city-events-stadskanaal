@@ -1632,7 +1632,7 @@ ul {
   gap: 0.25rem;
 }
 
-.facturen-kpi__card--draft {
+.facturen-kpi__card--unsent {
   border-left: 3px solid rgba(255, 193, 7, 0.5);
 }
 
@@ -1738,7 +1738,7 @@ ul {
   background: rgba(255, 255, 255, 0.06);
 }
 
-.facturen-section__count--draft {
+.facturen-section__count--unsent {
   border-color: rgba(255, 193, 7, 0.35);
   color: #ffe082;
 }
@@ -1873,7 +1873,7 @@ ul {
   text-transform: uppercase;
 }
 
-.facturen-pill--draft {
+.facturen-pill--unsent {
   background: rgba(255, 193, 7, 0.15);
   color: #ffe082;
   border: 1px solid rgba(255, 193, 7, 0.35);

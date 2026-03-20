@@ -42,8 +42,8 @@ export default async function FactuurDetailPage({
   );
 
   const statusLabel =
-    invoice.paid_at != null ? "Betaald" : invoice.sent_at != null ? "Openstaand" : "Concept";
-  const statusTone = invoice.paid_at != null ? "paid" : invoice.sent_at != null ? "sent" : "draft";
+    invoice.paid_at != null ? "Betaald" : invoice.sent_at != null ? "Openstaand" : "Onverstuurd";
+  const statusTone = invoice.paid_at != null ? "paid" : invoice.sent_at != null ? "sent" : "unsent";
 
   return (
     <div className="beheer-page beheer-page--facturen">
