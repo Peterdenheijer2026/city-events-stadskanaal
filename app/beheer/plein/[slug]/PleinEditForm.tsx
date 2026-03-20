@@ -284,16 +284,19 @@ export default function PleinEditForm({ pleinSlug, initial }: Props) {
                   )}
                 </div>
               )}
-              <input
-                type="file"
-                accept="image/*"
-                data-slot-index={i}
-                onChange={(e) => {
-                  const input = e.currentTarget;
-                  const idx = parseInt(input.getAttribute("data-slot-index") ?? "0", 10);
-                  setSlotFile(idx, input.files?.[0] ?? null);
-                }}
-              />
+              <div className="plein-edit__file-row">
+                <label className="plein-edit__file-label facturen-btn facturen-btn--ghost facturen-btn--tiny">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="plein-edit__file-input"
+                    onChange={(e) => {
+                      setSlotFile(i, e.currentTarget.files?.[0] ?? null);
+                    }}
+                  />
+                  <span className="plein-edit__file-label-text">{slot.file ? "Ander bestand" : "Bestand kiezen"}</span>
+                </label>
+              </div>
               <div className="plein-edit__image-actions">
                 <button
                   type="button"
