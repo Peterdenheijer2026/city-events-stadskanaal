@@ -108,12 +108,18 @@ export default async function FactuurDetailPage({
                   <strong>E-mail:</strong> {customer.email}
                 </span>
               ) : null}
+              {customer.recipient_name ? (
+                <span>
+                  <strong>Aanhef e-mail:</strong> {customer.recipient_name}
+                </span>
+              ) : null}
             </div>
           </section>
 
           <InvoiceEmailPanel
             invoiceId={id}
             initialEmail={customer.email}
+            initialRecipientName={customer.recipient_name}
             sentAt={invoice.sent_at}
             emailConfigured={emailConfigured}
           />

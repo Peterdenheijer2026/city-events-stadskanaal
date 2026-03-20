@@ -17,6 +17,8 @@ type Line = {
 
 type Customer = {
   name: string;
+  /** Aanhef in factuur-e-mail; leeg = gebruik naam betaler. */
+  recipientName: string;
   email: string;
   postcode: string;
   houseNumber: string;
@@ -63,6 +65,7 @@ export default function InvoiceForm() {
   const [manualAddress, setManualAddress] = useState(false);
   const [customer, setCustomer] = useState<Customer>({
     name: "",
+    recipientName: "",
     email: "",
     postcode: "",
     houseNumber: "",
@@ -302,6 +305,14 @@ export default function InvoiceForm() {
               value={customer.email}
               onChange={(e) => setCustomer((c) => ({ ...c, email: e.target.value }))}
               placeholder="optioneel, bijv. sponsor@bedrijf.nl"
+            />
+          </label>
+          <label className="invoice-form__span2">
+            Naam ontvanger (voor aanhef in e-mail)
+            <input
+              value={customer.recipientName}
+              onChange={(e) => setCustomer((c) => ({ ...c, recipientName: e.target.value }))}
+              placeholder="bijv. Jan Jansen of Bedrijfsnaam BV — leeg = naam betaler hierboven"
             />
           </label>
           <label>

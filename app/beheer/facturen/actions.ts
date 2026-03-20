@@ -6,7 +6,8 @@ import { revalidatePath } from "next/cache";
 import { getAppOrigin } from "@/lib/app-origin";
 import { loadInvoicePdfData } from "@/lib/invoice-pdf-data";
 import { buildInvoicePdfBuffer, STICHTING } from "@/lib/invoice-pdf";
-import { escapeHtml, sendInvoiceEmail } from "@/lib/send-invoice-email";
+import { buildInvoiceEmailBodyHtml } from "@/lib/invoice-email-text";
+import { sendInvoiceEmail } from "@/lib/send-invoice-email";
 
 const TREASURER_EMAIL = "penningmeester@cityeventsstadskanaal.nl";
 
@@ -27,6 +28,8 @@ export type InvoiceDraft = {
   notes: string;
   customer: {
     name: string;
+    /** Optioneel: alleen voor aanhef in e-mail; anders wordt betaler-naam gebruikt. */
+    recipientName?: string | null;
     email?: string | null;
     postcode: string;
     houseNumber: string;
@@ -94,10 +97,14 @@ export async function createInvoice(draft: InvoiceDraft): Promise<{ id: string |
       customerEmail = emailRaw.toLowerCase();
     }
 
+    const recipientRaw = (draft.customer.recipientName ?? "").trim();
+    const recipientName = recipientRaw || null;
+
     const { data: customerRow, error: custErr } = await supabase
       .from("invoice_customers")
       .insert({
         name: draft.customer.name.trim(),
+        recipient_name: recipientName,
         email: customerEmail,
         postcode: draft.customer.postcode?.trim() || null,
         house_number: draft.customer.houseNumber?.trim() || null,
@@ -246,6 +253,7 @@ export async function getInvoice(id: string): Promise<{
   invoice: { id: string; invoice_number: string; invoice_date: string; subject: string | null; notes: string | null; sent_at: string | null; paid_at: string | null };
   customer: {
     name: string;
+    recipient_name: string | null;
     email: string | null;
     postcode: string | null;
     house_number: string | null;
@@ -267,7 +275,7 @@ export async function getInvoice(id: string): Promise<{
 
   const { data: customer, error: custErr } = await supabase
     .from("invoice_customers")
-    .select("name, email, postcode, house_number, house_number_addition, street, city, country")
+    .select("name, recipient_name, email, postcode, house_number, house_number_addition, street, city, country")
     .eq("id", invoice.customer_id)
     .single();
   if (custErr) return null;
@@ -294,18 +302,20 @@ export async function getInvoice(id: string): Promise<{
   };
 }
 
-export async function updateInvoiceCustomerEmail(
+export async function updateInvoiceCustomerContact(
   invoiceId: string,
-  email: string | null
+  input: { email: string | null; recipientName: string | null }
 ): Promise<{ error: string | null }> {
   try {
     const { supabase } = await assertTreasurer();
-    const trimmed = email?.trim() ?? "";
-    let value: string | null = null;
+    const trimmed = input.email?.trim() ?? "";
+    let emailValue: string | null = null;
     if (trimmed) {
       if (!isValidEmail(trimmed)) return { error: "Ongeldig e-mailadres." };
-      value = trimmed.toLowerCase();
+      emailValue = trimmed.toLowerCase();
     }
+
+    const recipientName = (input.recipientName ?? "").trim() || null;
 
     const { data: inv, error: invErr } = await supabase
       .from("invoices")
@@ -314,7 +324,10 @@ export async function updateInvoiceCustomerEmail(
       .single();
     if (invErr || !inv) return { error: "Factuur niet gevonden." };
 
-    const { error } = await supabase.from("invoice_customers").update({ email: value }).eq("id", inv.customer_id);
+    const { error } = await supabase
+      .from("invoice_customers")
+      .update({ email: emailValue, recipient_name: recipientName })
+      .eq("id", inv.customer_id);
     if (error) return { error: error.message };
     revalidatePath("/beheer/facturen");
     revalidatePath(`/beheer/facturen/${invoiceId}`);
@@ -346,9 +359,13 @@ export async function sendInvoiceByEmail(invoiceId: string): Promise<{ error: st
     const pdfBytes = await buildInvoicePdfBuffer(pdfData, logoUrl);
 
     const num = pdfData.invoice.invoice_number;
-    const html = `<p>Beste ${escapeHtml(data.customer.name)},</p>
-<p>Hierbij ontvangt u factuur <strong>${escapeHtml(num)}</strong> van ${escapeHtml(STICHTING.name)}.</p>
-<p>Met vriendelijke groet,<br/>${escapeHtml(STICHTING.name)}</p>`;
+    const recipientName = data.customer.recipient_name ?? null;
+    const html = buildInvoiceEmailBodyHtml({
+      invoiceNumber: num,
+      invoiceDate: pdfData.invoice.invoice_date,
+      payerName: data.customer.name,
+      recipientName,
+    });
 
     const sent = await sendInvoiceEmail({
       to,

@@ -220,7 +220,7 @@ export default function InvoiceListClient({
       </div>
 
       {renderTable("Onverstuurd", onverstuurd, "unsent")}
-      {renderTable("Verstuurd (openstaand)", sent, "sent")}
+      {renderTable("Openstaand", sent, "sent")}
       {renderTable("Betaald", paid, "paid")}
     </>
   );

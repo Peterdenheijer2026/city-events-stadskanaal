@@ -2,21 +2,24 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { sendInvoiceByEmail, updateInvoiceCustomerEmail } from "../actions";
+import { sendInvoiceByEmail, updateInvoiceCustomerContact } from "../actions";
 
 export default function InvoiceEmailPanel({
   invoiceId,
   initialEmail,
+  initialRecipientName,
   sentAt,
   emailConfigured,
 }: {
   invoiceId: string;
   initialEmail: string | null;
+  initialRecipientName: string | null;
   sentAt: string | null;
   emailConfigured: boolean;
 }) {
   const router = useRouter();
   const [email, setEmail] = useState(initialEmail ?? "");
+  const [recipientName, setRecipientName] = useState(initialRecipientName ?? "");
   const [error, setError] = useState<string | null>(null);
   const [pending, startTransition] = useTransition();
 
@@ -26,7 +29,10 @@ export default function InvoiceEmailPanel({
     e.preventDefault();
     setError(null);
     startTransition(async () => {
-      const res = await updateInvoiceCustomerEmail(invoiceId, email || null);
+      const res = await updateInvoiceCustomerContact(invoiceId, {
+        email: email || null,
+        recipientName: recipientName || null,
+      });
       if (res.error) {
         setError(res.error);
         return;
@@ -51,8 +57,8 @@ export default function InvoiceEmailPanel({
     <section className="invoice-form__section facturen-panel">
       <h2 className="facturen-panel__h">E-mail</h2>
       <p className="facturen-panel__intro">
-        Factuur als PDF versturen naar het e-mailadres van de betaler (via <strong>SMTP</strong> of Resend). Na
-        verzenden wordt de factuur automatisch als <strong>verstuurd</strong> gemarkeerd.
+        Factuur als PDF versturen naar het e-mailadres van de betaler. Na verzenden wordt de factuur automatisch als{" "}
+        <strong>verstuurd</strong> gemarkeerd.
       </p>
       {!emailConfigured && (
         <p className="facturen-alert facturen-alert--warn" role="status">
@@ -78,6 +84,15 @@ export default function InvoiceEmailPanel({
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="naam@voorbeeld.nl"
+            disabled={pending}
+          />
+        </label>
+        <label className="facturen-email-form__label">
+          Naam voor aanhef in e-mail
+          <input
+            value={recipientName}
+            onChange={(e) => setRecipientName(e.target.value)}
+            placeholder="bijv. Jan Jansen — leeg = naam betaler op factuur"
             disabled={pending}
           />
         </label>

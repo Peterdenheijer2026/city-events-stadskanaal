@@ -137,6 +137,10 @@ create index if not exists invoices_paid_at_idx on public.invoices(paid_at);
 alter table public.invoice_customers
   add column if not exists email text;
 
+-- ---------- 017: aanhef-naam voor factuur-e-mail ----------
+alter table public.invoice_customers
+  add column if not exists recipient_name text;
+
 -- ---------- 014: crediteuren (purchase_invoices) ----------
 create table if not exists public.purchase_invoices (
   id uuid primary key default gen_random_uuid(),

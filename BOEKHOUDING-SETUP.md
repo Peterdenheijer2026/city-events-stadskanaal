@@ -22,7 +22,8 @@ Alleen **penningmeester@cityeventsstadskanaal.nl** (en super admin) hebben toega
 
 ### 1. Database
 
-Voer **`016_invoice_customer_email.sql`** uit in de SQL Editor (kolom `email` op `invoice_customers`).
+Voer **`016_invoice_customer_email.sql`** uit in de SQL Editor (kolom `email` op `invoice_customers`).  
+Voer daarna **`017_invoice_customer_recipient_name.sql`** uit (optionele **aanhef-naam** voor factuur-e-mails).
 
 ### 2. Keuze: SMTP (eigen mailbox) of Resend
 

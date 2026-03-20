@@ -22,6 +22,7 @@ export default function CrediteurenClient({ initialRows }: { initialRows: Purcha
 
   const open = filtered.filter((r) => !r.paid_at);
   const done = filtered.filter((r) => r.paid_at);
+  const totalAll = filtered.length;
 
   function refresh() {
     startTransition(async () => {
@@ -118,6 +119,21 @@ export default function CrediteurenClient({ initialRows }: { initialRows: Purcha
 
   return (
     <>
+      <div className="facturen-kpi">
+        <div className="facturen-kpi__card">
+          <span className="facturen-kpi__value">{totalAll}</span>
+          <span className="facturen-kpi__label">Totaal crediteuren</span>
+        </div>
+        <div className="facturen-kpi__card facturen-kpi__card--unsent">
+          <span className="facturen-kpi__value">{open.length}</span>
+          <span className="facturen-kpi__label">Openstaand</span>
+        </div>
+        <div className="facturen-kpi__card facturen-kpi__card--paid">
+          <span className="facturen-kpi__value">{done.length}</span>
+          <span className="facturen-kpi__label">Betaald</span>
+        </div>
+      </div>
+
       <div className="facturen-search">
         <label className="facturen-search__label" htmlFor="crediteuren-zoek">
           Zoeken
@@ -131,7 +147,7 @@ export default function CrediteurenClient({ initialRows }: { initialRows: Purcha
         />
       </div>
 
-      <RowTable title="Nog te betalen" items={open} tone="open" />
+      <RowTable title="Openstaand" items={open} tone="open" />
       <RowTable title="Betaald" items={done} tone="paid" />
     </>
   );
