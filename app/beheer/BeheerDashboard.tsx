@@ -8,11 +8,9 @@ import { deleteUserAccount } from "./actions";
 import type { PleinItem } from "@/lib/pleinen";
 
 const SUPER_ADMIN_EMAIL = "admin@cityeventsstadskanaal.nl";
-const TREASURER_EMAIL = "penningmeester@cityeventsstadskanaal.nl";
 
 type Props = {
   isSuperAdmin: boolean;
-  isTreasurer: boolean;
   pleinen: readonly PleinItem[];
   myPermissions: string[];
   allProfiles: { id: string; email: string; is_super_admin: boolean }[];
@@ -22,7 +20,6 @@ type Props = {
 
 export default function BeheerDashboard({
   isSuperAdmin,
-  isTreasurer,
   pleinen,
   myPermissions,
   allProfiles,
@@ -58,7 +55,8 @@ export default function BeheerDashboard({
   }
 
   async function handleDelete(userId: string, email: string) {
-    if (!confirm(`Weet je zeker dat je het account van ${email} wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.`)) return;
+    if (!confirm(`Weet je zeker dat je het account van ${email} wilt verwijderen? Deze actie kan niet ongedaan worden gemaakt.`))
+      return;
     setDeleting(userId);
     setError(null);
     const { error: err } = await deleteUserAccount(userId);
@@ -72,48 +70,31 @@ export default function BeheerDashboard({
   }
 
   return (
-    <main className="beheer-dashboard">
+    <main className="facturen-app__main beheer-dashboard beheer-dashboard--app">
       {error && (
-        <p className="beheer-dashboard__error" role="alert">
+        <p className="facturen-alert facturen-alert--error" role="alert">
           Fout bij opslaan: {error}
         </p>
       )}
 
-      {isTreasurer && (
-        <section className="beheer-dashboard__section">
-          <h2>Boekhouding</h2>
-          <p className="beheer-dashboard__hint">
-            Debiteuren en crediteuren, PDF-upload, en overzicht geldstromen.
-          </p>
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", alignItems: "flex-start" }}>
-            <Link href="/beheer/boekhouding" className="beheer-dashboard__link">
-              Boekhoud-overzicht
-            </Link>
-            <Link href="/beheer/facturen" className="beheer-dashboard__link">
-              Debiteuren
-            </Link>
-            <Link href="/beheer/boekhouding/crediteuren" className="beheer-dashboard__link">
-              Crediteuren
-            </Link>
-          </div>
-        </section>
-      )}
-
       {isSuperAdmin && (
-        <section className="beheer-dashboard__section">
-          <h2>Pleinrechten toewijzen</h2>
-          <p className="beheer-dashboard__hint">
-            Vink per gebruiker aan welke pleinpagina&apos;s zij mogen beheren.
+        <section className="facturen-panel">
+          <h2 className="facturen-panel__h">Pleinrechten toewijzen</h2>
+          <p className="facturen-panel__intro">
+            Vink per gebruiker aan welke pleinpagina&apos;s zij mogen beheren. Hoofdbeheerders hebben automatisch
+            toegang tot alle pleinen.
           </p>
-          <div className="beheer-dashboard__table-wrap">
-            <table className="beheer-dashboard__table">
+          <div className="facturen-table-wrap">
+            <table className="facturen-table beheer-dashboard__table">
               <thead>
                 <tr>
                   <th>Gebruiker</th>
                   {pleinen.map((p) => (
-                    <th key={p.slug}>{p.name}</th>
+                    <th key={p.slug} className="beheer-dashboard__th-plein">
+                      {p.name}
+                    </th>
                   ))}
-                  <th className="beheer-dashboard__th-acties">Acties</th>
+                  <th className="facturen-table__right beheer-dashboard__th-acties">Acties</th>
                 </tr>
               </thead>
               <tbody>
@@ -124,14 +105,18 @@ export default function BeheerDashboard({
                   return (
                     <tr key={prof.id}>
                       <td>
-                        {prof.email}
-                        {prof.is_super_admin && " (hoofdbeheerder)"}
+                        <span className="beheer-dashboard__email">{prof.email}</span>
+                        {prof.is_super_admin && (
+                          <span className="beheer-dashboard__badge">Hoofdbeheerder</span>
+                        )}
                       </td>
                       {pleinen.map((p) => {
-                        const has = prof.is_super_admin || userPermissions.some((up) => up.user_id === prof.id && up.plein_slug === p.slug);
+                        const has =
+                          prof.is_super_admin ||
+                          userPermissions.some((up) => up.user_id === prof.id && up.plein_slug === p.slug);
                         const isSaving = saving === `${prof.id}-${p.slug}`;
                         return (
-                          <td key={p.slug}>
+                          <td key={p.slug} className="beheer-dashboard__td-check">
                             {prof.is_super_admin ? (
                               <span className="beheer-dashboard__all">alle</span>
                             ) : (
@@ -142,24 +127,24 @@ export default function BeheerDashboard({
                                   disabled={isSaving}
                                   onChange={(e) => togglePermission(prof.id, p.slug, e.target.checked)}
                                 />
-                                {isSaving ? "…" : ""}
+                                {isSaving ? <span className="beheer-dashboard__saving">…</span> : null}
                               </label>
                             )}
                           </td>
                         );
                       })}
-                      <td className="beheer-dashboard__acties">
+                      <td className="facturen-table__right beheer-dashboard__acties">
                         {canDelete ? (
                           <button
                             type="button"
-                            className="beheer-dashboard__btn-delete"
+                            className="facturen-btn facturen-btn--danger facturen-btn--tiny"
                             onClick={() => handleDelete(prof.id, prof.email)}
                             disabled={deleting === prof.id}
                           >
                             {deleting === prof.id ? "…" : "Verwijderen"}
                           </button>
                         ) : (
-                          <span className="beheer-dashboard__no-delete">—</span>
+                          <span className="facturen-table__muted">—</span>
                         )}
                       </td>
                     </tr>
@@ -171,17 +156,25 @@ export default function BeheerDashboard({
         </section>
       )}
 
-      <section className="beheer-dashboard__section">
-        <h2>Pleinen beheren</h2>
-        <ul className="beheer-dashboard__pleinen">
+      <section className="facturen-panel">
+        <h2 className="facturen-panel__h">Pleinen beheren</h2>
+        <p className="facturen-panel__intro">
+          Open een plein om teksten, programma en afbeeldingen aan te passen. Alleen pleinen waarvoor je rechten hebt
+          zijn beschikbaar.
+        </p>
+        <ul className="beheer-dashboard__pleinen-grid">
           {pleinen.map((p) => (
             <li key={p.slug}>
               {myPermissions.includes(p.slug) ? (
-                <Link href={`/beheer/plein/${p.slug}`} className="beheer-dashboard__link">
-                  {p.name} – bewerken
+                <Link href={`/beheer/plein/${p.slug}`} className="facturen-btn facturen-btn--ghost beheer-dashboard__plein-link">
+                  <span className="beheer-dashboard__plein-name">{p.name}</span>
+                  <span className="beheer-dashboard__plein-action">Bewerken →</span>
                 </Link>
               ) : (
-                <span className="beheer-dashboard__no-access">{p.name} (geen toegang)</span>
+                <div className="beheer-dashboard__plein-locked">
+                  <span className="beheer-dashboard__plein-name">{p.name}</span>
+                  <span className="beheer-dashboard__plein-lock">Geen toegang</span>
+                </div>
               )}
             </li>
           ))}
