@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { FinancienNav } from "@/app/components/FinancienNav";
 import { redirect } from "next/navigation";
 import { listInvoices } from "./actions";
 import InvoiceListClient from "./InvoiceListClient";
@@ -27,17 +28,9 @@ export default async function FacturenPage() {
             <h1 className="facturen-app__title">Debiteuren</h1>
             <p className="facturen-app__subtitle">Openstaande vorderingen: overzicht, status en betalingen</p>
           </div>
-          <div className="facturen-app__toolbar">
-            <Link href="/beheer" className="facturen-btn facturen-btn--ghost">
-              ← Beheer
-            </Link>
-            <Link href="/beheer/boekhouding" className="facturen-btn facturen-btn--ghost">
-              Boekhouding
-            </Link>
-            <Link href="/beheer/facturen/nieuw" className="facturen-btn facturen-btn--primary">
-              + Nieuwe factuur
-            </Link>
-          </div>
+          <FinancienNav
+            primaryAction={{ href: "/beheer/facturen/nieuw", label: "+ Nieuwe factuur" }}
+          />
         </header>
 
         <main className="facturen-app__main">

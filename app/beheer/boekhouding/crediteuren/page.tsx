@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { FinancienNav } from "@/app/components/FinancienNav";
 import { redirect } from "next/navigation";
 import { listPurchaseInvoices } from "../actions";
 import CrediteurenClient from "./CrediteurenClient";
@@ -36,18 +37,26 @@ export default async function CrediteurenPage() {
               Facturen van leveranciers: PDF, bedragen en betalingen bijhouden.
             </p>
           </div>
-          <div className="facturen-app__toolbar facturen-app__toolbar--wrap">
-            <Link href="/beheer/boekhouding" className="facturen-btn facturen-btn--ghost">
-              ← Boekhouding
-            </Link>
-            <Link href="/beheer/facturen" className="facturen-btn facturen-btn--ghost">
-              Debiteuren
-            </Link>
-          </div>
+          <FinancienNav
+            primaryAction={{
+              href: "/beheer/boekhouding/crediteuren/nieuw",
+              label: "+ Factuur inboeken",
+            }}
+          />
         </header>
 
         <main className="facturen-app__main">
-          <CrediteurenClient initialRows={rows} />
+          {rows.length === 0 ? (
+            <div className="facturen-empty">
+              <p className="facturen-empty__title">Nog geen crediteuren</p>
+              <p className="facturen-empty__text">Boek je eerste leveranciersfactuur in om te beginnen.</p>
+              <Link href="/beheer/boekhouding/crediteuren/nieuw" className="facturen-btn facturen-btn--primary">
+                Factuur inboeken
+              </Link>
+            </div>
+          ) : (
+            <CrediteurenClient initialRows={rows} />
+          )}
         </main>
       </div>
     </div>

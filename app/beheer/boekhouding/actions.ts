@@ -237,6 +237,7 @@ export async function createPurchaseInvoice(formData: FormData): Promise<{ id: s
 
     revalidatePath("/beheer/boekhouding");
     revalidatePath("/beheer/boekhouding/crediteuren");
+    revalidatePath("/beheer/boekhouding/crediteuren/nieuw");
     return { id: row.id, error: null };
   } catch (e) {
     return { id: null, error: e instanceof Error ? e.message : "Opslaan mislukt." };

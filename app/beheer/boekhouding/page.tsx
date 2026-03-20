@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { FinancienNav } from "@/app/components/FinancienNav";
 import { redirect } from "next/navigation";
 import { getBookkeepingSummary } from "./actions";
 
@@ -40,17 +40,7 @@ export default async function BoekhoudingPage() {
               Overzicht van geldstromen: debiteuren, crediteuren en mutaties per maand.
             </p>
           </div>
-          <div className="facturen-app__toolbar facturen-app__toolbar--wrap">
-            <Link href="/beheer" className="facturen-btn facturen-btn--ghost">
-              ← Beheer
-            </Link>
-            <Link href="/beheer/facturen" className="facturen-btn facturen-btn--ghost">
-              Debiteuren
-            </Link>
-            <Link href="/beheer/boekhouding/crediteuren" className="facturen-btn facturen-btn--primary">
-              Crediteuren
-            </Link>
-          </div>
+          <FinancienNav hub />
         </header>
 
         <main className="facturen-app__main">

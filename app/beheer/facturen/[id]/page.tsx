@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { FinancienNav } from "@/app/components/FinancienNav";
 import { redirect } from "next/navigation";
 import { getInvoice } from "../actions";
 import DeleteInvoiceButton from "./DeleteInvoiceButton";
@@ -57,13 +57,7 @@ export default async function FactuurDetailPage({
               {invoice.subject ? ` · ${invoice.subject}` : ""}
             </p>
           </div>
-          <div className="facturen-app__toolbar facturen-app__toolbar--wrap">
-            <Link href="/beheer/facturen" className="facturen-btn facturen-btn--ghost">
-              ← Facturen
-            </Link>
-            <Link href="/beheer/boekhouding" className="facturen-btn facturen-btn--ghost">
-              Boekhouding
-            </Link>
+          <FinancienNav>
             <a
               href={`/beheer/facturen/${id}/pdf`}
               target="_blank"
@@ -73,7 +67,7 @@ export default async function FactuurDetailPage({
               PDF downloaden
             </a>
             <DeleteInvoiceButton id={id} />
-          </div>
+          </FinancienNav>
         </header>
 
         <div className="facturen-detail-meta">
