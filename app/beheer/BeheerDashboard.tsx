@@ -81,13 +81,21 @@ export default function BeheerDashboard({
 
       {isTreasurer && (
         <section className="beheer-dashboard__section">
-          <h2>Facturen</h2>
+          <h2>Boekhouding</h2>
           <p className="beheer-dashboard__hint">
-            Facturen aanmaken en als PDF downloaden.
+            Uitgaande en inkomende facturen, PDF-upload, en overzicht geldstromen.
           </p>
-          <Link href="/beheer/facturen" className="beheer-dashboard__link">
-            Naar facturen
-          </Link>
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", alignItems: "flex-start" }}>
+            <Link href="/beheer/boekhouding" className="beheer-dashboard__link">
+              Boekhoud-overzicht
+            </Link>
+            <Link href="/beheer/facturen" className="beheer-dashboard__link">
+              Uitgaande facturen
+            </Link>
+            <Link href="/beheer/boekhouding/inkomende" className="beheer-dashboard__link">
+              Inkomende facturen
+            </Link>
+          </div>
         </section>
       )}
 

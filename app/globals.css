@@ -1953,6 +1953,100 @@ ul {
   border: none;
 }
 
+/* ========== BOEKHOUDING ========== */
+.boekhoud-kpi {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.85rem;
+  margin-bottom: 2rem;
+}
+
+.boekhoud-kpi__card {
+  padding: 1.1rem 1.15rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.boekhoud-kpi__card--in {
+  border-left: 3px solid rgba(129, 199, 132, 0.65);
+}
+
+.boekhoud-kpi__card--out {
+  border-left: 3px solid rgba(239, 154, 154, 0.75);
+}
+
+.boekhoud-kpi__card--net {
+  border-left: 3px solid rgba(100, 181, 246, 0.65);
+}
+
+.boekhoud-kpi__card--ytd {
+  border-left: 3px solid rgba(255, 183, 77, 0.65);
+}
+
+.boekhoud-kpi__label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.boekhoud-kpi__value {
+  font-size: 1.45rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-white);
+}
+
+.boekhoud-kpi__hint,
+.boekhoud-kpi__sub {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.5);
+  line-height: 1.35;
+}
+
+.boekhoud-kpi__sub strong {
+  color: rgba(255, 255, 255, 0.88);
+  font-variant-numeric: tabular-nums;
+}
+
+.boekhoud-section {
+  margin-top: 0.5rem;
+}
+
+.boekhoud-section__title {
+  margin: 0 0 0.35rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.boekhoud-section__intro {
+  margin: 0 0 1rem;
+  font-size: 0.85rem;
+  color: var(--color-gray);
+  max-width: 42rem;
+}
+
+.boekhoud-form-card__intro {
+  margin: -0.25rem 0 1rem;
+  font-size: 0.875rem;
+  color: var(--color-gray);
+  max-width: 40rem;
+}
+
+.facturen-btn--tiny {
+  padding: 0.35rem 0.55rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
 /* ========== BEHEER PLEIN BEWERKEN ========== */
 .beheer-plein {
   max-width: 700px;

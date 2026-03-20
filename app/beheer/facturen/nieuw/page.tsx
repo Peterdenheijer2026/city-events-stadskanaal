@@ -20,13 +20,16 @@ export default async function NieuweFactuurPage() {
       <div className="facturen-app">
         <header className="facturen-app__header">
           <div className="facturen-app__title-block">
-            <p className="facturen-app__eyebrow">Financiën · Nieuw</p>
-            <h1 className="facturen-app__title">Nieuwe factuur</h1>
+            <p className="facturen-app__eyebrow">Financiën · Uitgaand · Nieuw</p>
+            <h1 className="facturen-app__title">Nieuwe uitgaande factuur</h1>
             <p className="facturen-app__subtitle">Betaler, regels en bedragen invoeren</p>
           </div>
           <div className="facturen-app__toolbar">
             <Link href="/beheer/facturen" className="facturen-btn facturen-btn--ghost">
-              ← Terug naar overzicht
+              ← Facturen
+            </Link>
+            <Link href="/beheer/boekhouding" className="facturen-btn facturen-btn--ghost">
+              Boekhouding
             </Link>
           </div>
         </header>

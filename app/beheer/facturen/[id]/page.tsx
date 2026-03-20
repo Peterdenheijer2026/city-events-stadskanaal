@@ -50,7 +50,7 @@ export default async function FactuurDetailPage({
       <div className="facturen-app">
         <header className="facturen-app__header">
           <div className="facturen-app__title-block">
-            <p className="facturen-app__eyebrow">Financiën · Detail</p>
+            <p className="facturen-app__eyebrow">Financiën · Uitgaand · Detail</p>
             <h1 className="facturen-app__title">{invoice.invoice_number}</h1>
             <p className="facturen-app__subtitle">
               {invoice.invoice_date}
@@ -59,7 +59,10 @@ export default async function FactuurDetailPage({
           </div>
           <div className="facturen-app__toolbar facturen-app__toolbar--wrap">
             <Link href="/beheer/facturen" className="facturen-btn facturen-btn--ghost">
-              ← Overzicht
+              ← Facturen
+            </Link>
+            <Link href="/beheer/boekhouding" className="facturen-btn facturen-btn--ghost">
+              Boekhouding
             </Link>
             <a
               href={`/beheer/facturen/${id}/pdf`}

@@ -6,6 +6,9 @@
 drop policy if exists "invoice_customers_super_admin_all" on public.invoice_customers;
 drop policy if exists "invoices_super_admin_all" on public.invoices;
 drop policy if exists "invoice_lines_super_admin_all" on public.invoice_lines;
+drop policy if exists "invoice_customers_treasurer_all" on public.invoice_customers;
+drop policy if exists "invoices_treasurer_all" on public.invoices;
+drop policy if exists "invoice_lines_treasurer_all" on public.invoice_lines;
 
 create policy "invoice_customers_treasurer_all"
   on public.invoice_customers
