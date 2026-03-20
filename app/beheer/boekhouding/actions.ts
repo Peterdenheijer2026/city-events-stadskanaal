@@ -1,6 +1,7 @@
 "use server";
 
 import { randomUUID } from "node:crypto";
+import type { BookkeepingSummary } from "@/lib/bookkeeping";
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
@@ -27,26 +28,27 @@ function sumInvoiceLines(lines: { unit_price_excl: number; quantity: number; vat
   return lines.reduce((s, l) => s + lineIncl(l.unit_price_excl, l.quantity, l.vat_rate), 0);
 }
 
-export type BookkeepingSummary = {
-  /** Debiteuren: nog te ontvangen (verstuurd, niet betaald) */
-  debiteurenOpen: number;
-  /** Crediteuren: nog te betalen */
-  crediteurenOpen: number;
-  /** debiteurenOpen - crediteurenOpen */
-  nettoLiquide: number;
-  /** Debiteuren YTD betaald (dit kalenderjaar) */
-  debiteurenBetaaldYtd: number;
-  /** Crediteuren YTD betaald */
-  crediteurenBetaaldYtd: number;
-  /** Per maand laatste 6 maanden */
-  maandOverzicht: {
-    maandKey: string;
-    maandLabel: string;
-    debiteurenBetaald: number;
-    crediteurenBetaald: number;
-    netto: number;
-  }[];
-};
+/** BTW-bedrag op factuurregel (verkoop). */
+function lineVatAmount(excl: number, qty: number, vatRate: number) {
+  const exclTot = excl * qty;
+  return Math.round((exclTot * vatRate + Number.EPSILON) * 100) / 100;
+}
+
+function sumInvoiceLinesVat(lines: { unit_price_excl: number; quantity: number; vat_rate: number }[]) {
+  return lines.reduce((s, l) => s + lineVatAmount(l.unit_price_excl, l.quantity, l.vat_rate), 0);
+}
+
+/** BTW op inkoopfactuur (voorbelasting). */
+function purchaseVatAmount(amountIncl: number, amountExcl: number | null | undefined, vatRate: number) {
+  const ai = Number(amountIncl);
+  if (amountExcl != null && Number.isFinite(Number(amountExcl))) {
+    return Math.round((ai - Number(amountExcl) + Number.EPSILON) * 100) / 100;
+  }
+  const excl = vatRate === 0 ? ai : ai / (1 + vatRate);
+  return Math.round((ai - excl + Number.EPSILON) * 100) / 100;
+}
+
+export type { BookkeepingSummary } from "@/lib/bookkeeping";
 
 function monthKey(d: Date) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
@@ -82,9 +84,12 @@ export async function getBookkeepingSummary(): Promise<BookkeepingSummary> {
   yearStart.setMonth(0, 1);
   yearStart.setHours(0, 0, 0, 0);
 
-  const sixMonthStart = new Date(now.getFullYear(), now.getMonth() - 5, 1);
-  sixMonthStart.setHours(0, 0, 0, 0);
-  const fromIso = sixMonthStart.toISOString();
+  /** Rolling 12 maanden (eerste van de maand t/m huidige maand). */
+  const twelveMonthStart = new Date(now.getFullYear(), now.getMonth() - 11, 1);
+  twelveMonthStart.setHours(0, 0, 0, 0);
+  /** Laad vanaf vroegste van jaarstart of 12-maandenvenster zodat YTD en grafiek kloppen. */
+  const rangeStart = new Date(Math.min(yearStart.getTime(), twelveMonthStart.getTime()));
+  const fromIso = rangeStart.toISOString();
 
   const { data: paidInv, error: e3 } = await supabase
     .from("invoices")
@@ -94,37 +99,51 @@ export async function getBookkeepingSummary(): Promise<BookkeepingSummary> {
   if (e3) throw e3;
 
   let debiteurenBetaaldYtd = 0;
+  let btwVerkopenYtd = 0;
   const debiteurenPerMonth: Record<string, number> = {};
   for (const inv of paidInv ?? []) {
     const lines = (inv as { invoice_lines?: { unit_price_excl: number; quantity: number; vat_rate: number }[] }).invoice_lines ?? [];
     const tot = sumInvoiceLines(lines);
+    const vatTot = sumInvoiceLinesVat(lines);
     const paidAt = new Date((inv as { paid_at: string }).paid_at);
-    if (paidAt >= yearStart) debiteurenBetaaldYtd += tot;
+    if (paidAt >= yearStart) {
+      debiteurenBetaaldYtd += tot;
+      btwVerkopenYtd += vatTot;
+    }
     const k = monthKey(paidAt);
     debiteurenPerMonth[k] = (debiteurenPerMonth[k] ?? 0) + tot;
   }
   debiteurenBetaaldYtd = Math.round((debiteurenBetaaldYtd + Number.EPSILON) * 100) / 100;
+  btwVerkopenYtd = Math.round((btwVerkopenYtd + Number.EPSILON) * 100) / 100;
 
   const { data: paidPur, error: e4 } = await supabase
     .from("purchase_invoices")
-    .select("amount_incl, paid_at")
+    .select("amount_incl, amount_excl, vat_rate, paid_at")
     .not("paid_at", "is", null)
     .gte("paid_at", fromIso);
   if (e4) throw e4;
 
   let crediteurenBetaaldYtd = 0;
+  let btwInkoopYtd = 0;
   const crediteurenPerMonth: Record<string, number> = {};
   for (const p of paidPur ?? []) {
     const a = Number(p.amount_incl ?? 0);
+    const vr = Number((p as { vat_rate?: number }).vat_rate ?? 0.21);
     const paid = new Date(p.paid_at!);
-    if (paid >= yearStart) crediteurenBetaaldYtd += a;
+    if (paid >= yearStart) {
+      crediteurenBetaaldYtd += a;
+      btwInkoopYtd += purchaseVatAmount(a, (p as { amount_excl?: number | null }).amount_excl, vr);
+    }
     const k = monthKey(paid);
     crediteurenPerMonth[k] = (crediteurenPerMonth[k] ?? 0) + a;
   }
   crediteurenBetaaldYtd = Math.round((crediteurenBetaaldYtd + Number.EPSILON) * 100) / 100;
+  btwInkoopYtd = Math.round((btwInkoopYtd + Number.EPSILON) * 100) / 100;
+
+  const btwSaldoIndicatief = Math.round((btwVerkopenYtd - btwInkoopYtd + Number.EPSILON) * 100) / 100;
 
   const maandOverzicht: BookkeepingSummary["maandOverzicht"] = [];
-  for (let i = 5; i >= 0; i--) {
+  for (let i = 11; i >= 0; i--) {
     const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
     const k = monthKey(d);
     const v = Math.round(((debiteurenPerMonth[k] ?? 0) + Number.EPSILON) * 100) / 100;
@@ -144,6 +163,11 @@ export async function getBookkeepingSummary(): Promise<BookkeepingSummary> {
     nettoLiquide: Math.round((debiteurenOpen - crediteurenOpen + Number.EPSILON) * 100) / 100,
     debiteurenBetaaldYtd,
     crediteurenBetaaldYtd,
+    openDebiteurenAantal: (openSales ?? []).length,
+    openCrediteurenAantal: (openPur ?? []).length,
+    btwVerkopenYtd,
+    btwInkoopYtd,
+    btwSaldoIndicatief,
     maandOverzicht,
   };
 }

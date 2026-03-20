@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { FinancienNav } from "@/app/components/FinancienNav";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getBookkeepingSummary } from "./actions";
 
@@ -37,7 +38,13 @@ export default async function BoekhoudingPage() {
             <p className="facturen-app__eyebrow">Financiën</p>
             <h1 className="facturen-app__title">Boekhouding</h1>
             <p className="facturen-app__subtitle">
-              Overzicht van geldstromen: debiteuren, crediteuren en mutaties per maand.
+              Overzicht van geldstromen: debiteuren, crediteuren, BTW-indicatoren (betaald dit jaar) en mutaties per maand
+              (rolling 12 maanden).
+            </p>
+            <p className="facturen-app__subtitle facturen-app__subtitle--actions">
+              <Link href="/beheer/boekhouding/export" className="facturen-btn facturen-btn--ghost facturen-btn--tiny">
+                Export CSV (Excel)
+              </Link>
             </p>
           </div>
           <FinancienNav />
@@ -83,12 +90,35 @@ export default async function BoekhoudingPage() {
                     Crediteuren: <strong>{eur(summary.crediteurenBetaaldYtd)}</strong>
                   </span>
                 </div>
+                <div className="boekhoud-kpi__card boekhoud-kpi__card--count">
+                  <span className="boekhoud-kpi__label">Openstaande posten (aantal)</span>
+                  <span className="boekhoud-kpi__sub">
+                    Debiteurfacturen: <strong>{summary.openDebiteurenAantal}</strong>
+                  </span>
+                  <span className="boekhoud-kpi__sub">
+                    Crediteuren: <strong>{summary.openCrediteurenAantal}</strong>
+                  </span>
+                </div>
+                <div className="boekhoud-kpi__card boekhoud-kpi__card--btw">
+                  <span className="boekhoud-kpi__label">BTW indicatief (betaald dit jaar)</span>
+                  <span className="boekhoud-kpi__sub">
+                    Verkopen: <strong>{eur(summary.btwVerkopenYtd)}</strong>
+                  </span>
+                  <span className="boekhoud-kpi__sub">
+                    Inkoop / voorbelasting: <strong>{eur(summary.btwInkoopYtd)}</strong>
+                  </span>
+                  <span className="boekhoud-kpi__hint">
+                    Saldo (≈ bij te betalen): <strong className="boekhoud-kpi__hint-strong">{eur(summary.btwSaldoIndicatief)}</strong>
+                    — geen fiscaal advies; controleer bij je accountant.
+                  </span>
+                </div>
               </div>
 
               <section className="boekhoud-section">
-                <h2 className="boekhoud-section__title">Mutaties per maand (betaald)</h2>
+                <h2 className="boekhoud-section__title">Mutaties per maand (betaald) — 12 maanden</h2>
                 <p className="boekhoud-section__intro">
-                  Gebaseerd op de betaaldatum bij debiteuren (ontvangen) en bij crediteuren (betaald aan leveranciers).
+                  Rolling venster: de afgelopen twaalf kalendermaanden. Gebaseerd op de betaaldatum bij debiteuren
+                  (ontvangen) en bij crediteuren (betaald aan leveranciers).
                 </p>
                 <div className="facturen-table-wrap">
                   <table className="facturen-table facturen-table--numeric">

@@ -11,7 +11,8 @@ Zonder bucket mislukt uploaden van PDF’s bij **crediteuren**; de rest van de b
 
 ## Wat er bij komt
 
-- **`/beheer/boekhouding`** – Overzicht: te ontvangen (debiteuren), te betalen (crediteuren), netto, YTD betaald, tabel per maand.
+- **`/beheer/boekhouding`** – Overzicht: te ontvangen (debiteuren), te betalen (crediteuren), netto, aantallen openstaande posten, YTD betaald, **BTW-indicatoren** (verkoop/inkoop op basis van **betaald dit kalenderjaar** — indicatief, geen fiscaal advies), tabel **mutaties per maand (rolling 12 maanden)**.
+- **`/beheer/boekhouding/export`** – **CSV-download** (UTF-8 met BOM, puntkomma) voor Excel met dezelfde cijfers als het overzicht.
 - **`/beheer/boekhouding/crediteuren`** – Crediteuren registreren (optioneel PDF), markeren als betaald, verwijderen.
 
 Oude URL’s **`/beheer/boekhouding/inkoop`** en **`/beheer/boekhouding/inkomende`** worden automatisch doorgestuurd naar **`/beheer/boekhouding/crediteuren`**.

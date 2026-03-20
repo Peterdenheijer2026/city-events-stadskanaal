@@ -1619,6 +1619,10 @@ ul {
   max-width: 36rem;
 }
 
+.facturen-app__subtitle--actions {
+  margin-top: 0.65rem;
+}
+
 .facturen-app__toolbar {
   display: flex;
   flex-wrap: wrap;
@@ -2211,6 +2215,27 @@ ul {
 
 .boekhoud-kpi__card--ytd {
   border-left: 3px solid rgba(255, 183, 77, 0.65);
+}
+
+.boekhoud-kpi__card--count {
+  border-left: 3px solid rgba(171, 134, 255, 0.55);
+}
+
+.boekhoud-kpi__card--btw {
+  border-left: 3px solid rgba(186, 104, 200, 0.65);
+  grid-column: 1 / -1;
+  max-width: 100%;
+}
+
+@media (min-width: 900px) {
+  .boekhoud-kpi__card--btw {
+    grid-column: auto;
+  }
+}
+
+.boekhoud-kpi__hint-strong {
+  color: rgba(255, 255, 255, 0.92);
+  font-variant-numeric: tabular-nums;
 }
 
 .boekhoud-kpi__label {
