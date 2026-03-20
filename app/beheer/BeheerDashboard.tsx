@@ -166,7 +166,7 @@ export default function BeheerDashboard({
           {pleinen.map((p) => (
             <li key={p.slug}>
               {myPermissions.includes(p.slug) ? (
-                <Link href={`/beheer/plein/${p.slug}`} className="facturen-btn facturen-btn--ghost beheer-dashboard__plein-link">
+                <Link href={`/beheer/plein/${p.slug}`} className="facturen-btn facturen-btn--primary beheer-dashboard__plein-link">
                   <span className="beheer-dashboard__plein-name">{p.name}</span>
                   <span className="beheer-dashboard__plein-action">Bewerken →</span>
                 </Link>

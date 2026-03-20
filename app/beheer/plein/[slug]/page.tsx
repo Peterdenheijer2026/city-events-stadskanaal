@@ -6,12 +6,16 @@ import PleinEditForm from "./PleinEditForm";
 
 const SUPER_ADMIN_EMAIL = "admin@cityeventsstadskanaal.nl";
 
-export default async function BeheerPleinPage({ params }: { params: { slug: string } }) {
-  const slug = params.slug;
+export const dynamic = "force-dynamic";
+
+export default async function BeheerPleinPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
   if (!PLEIN_SLUGS.includes(slug)) notFound();
 
   const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) redirect("/beheer/login");
 
   const plein = PLEINEN.find((p) => p.slug === slug);
@@ -24,11 +28,7 @@ export default async function BeheerPleinPage({ params }: { params: { slug: stri
     .eq("user_id", user.id)
     .eq("plein_slug", slug)
     .maybeSingle();
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("is_super_admin")
-    .eq("id", user.id)
-    .single();
+  const { data: profile } = await supabase.from("profiles").select("is_super_admin").eq("id", user.id).single();
 
   const canEdit = isSuperAdmin || profile?.is_super_admin || perm;
   if (!canEdit) redirect("/beheer");
@@ -40,20 +40,37 @@ export default async function BeheerPleinPage({ params }: { params: { slug: stri
     .single();
 
   return (
-    <div className="beheer-plein">
-      <header className="beheer-plein__header">
-        <Link href="/beheer">Terug naar beheer</Link>
-        <h1>Bewerken: {plein.name}</h1>
-      </header>
-      <PleinEditForm
-        pleinSlug={slug}
-        pleinName={plein.name}
-        initial={{
-          general_text: content?.general_text ?? "",
-          program_data: content?.program_data ?? undefined,
-          image_paths: content?.image_paths ?? [],
-        }}
-      />
+    <div className="beheer-page beheer-page--facturen">
+      <div className="facturen-app">
+        <header className="facturen-app__header">
+          <div className="facturen-app__title-block">
+            <p className="facturen-app__eyebrow">Pleinen · Beheer</p>
+            <h1 className="facturen-app__title">{plein.name}</h1>
+            <p className="facturen-app__subtitle">
+              Algemene tekst, programma en afbeeldingen voor de openbare pleinpagina aanpassen.
+            </p>
+          </div>
+          <div className="facturen-app__toolbar facturen-app__toolbar--wrap beheer-plein-toolbar">
+            <Link href="/beheer" className="facturen-btn facturen-btn--ghost">
+              ← Terug naar beheer
+            </Link>
+            <Link href={`/plein/${slug}`} className="facturen-btn facturen-btn--primary" target="_blank" rel="noopener noreferrer">
+              Bekijk op site
+            </Link>
+          </div>
+        </header>
+
+        <main className="facturen-app__main">
+          <PleinEditForm
+            pleinSlug={slug}
+            initial={{
+              general_text: content?.general_text ?? "",
+              program_data: content?.program_data ?? undefined,
+              image_paths: content?.image_paths ?? [],
+            }}
+          />
+        </main>
+      </div>
     </div>
   );
 }

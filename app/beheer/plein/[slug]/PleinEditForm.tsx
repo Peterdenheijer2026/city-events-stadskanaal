@@ -43,7 +43,6 @@ const TIJD_OPTIES = getTijdOpties();
 
 type Props = {
   pleinSlug: string;
-  pleinName: string;
   initial: {
     general_text: string;
     program_data?: unknown;
@@ -51,7 +50,7 @@ type Props = {
   };
 };
 
-export default function PleinEditForm({ pleinSlug, pleinName, initial }: Props) {
+export default function PleinEditForm({ pleinSlug, initial }: Props) {
   const router = useRouter();
   const [generalText, setGeneralText] = useState(initial.general_text);
   const [programData, setProgramData] = useState<ProgrammaData>(() =>
@@ -187,24 +186,35 @@ export default function PleinEditForm({ pleinSlug, pleinName, initial }: Props) 
   }
 
   return (
-    <form onSubmit={handleSubmit} className="plein-edit">
+    <form onSubmit={handleSubmit} className="plein-edit plein-edit--app facturen-form">
       {message && (
-        <p className={`plein-edit__msg plein-edit__msg--${message.type}`}>{message.text}</p>
+        <p
+          className={`facturen-alert plein-edit__alert ${message.type === "ok" ? "facturen-alert--success" : "facturen-alert--error"}`}
+          role={message.type === "ok" ? "status" : "alert"}
+        >
+          {message.text}
+        </p>
       )}
 
-      <div className="plein-edit__field">
-        <label htmlFor="general_text">Algemene tekst</label>
+      <section className="invoice-form__section">
+        <h2>Algemene tekst</h2>
+        <p className="facturen-panel__intro plein-edit__section-intro">Deze tekst verschijnt op de openbare pleinpagina.</p>
+        <label className="plein-edit__label" htmlFor="general_text">
+          Inhoud
+        </label>
         <textarea
           id="general_text"
+          className="plein-edit__textarea"
           rows={6}
           value={generalText}
           onChange={(e) => setGeneralText(e.target.value)}
           placeholder="Tekst voor op de pleinpagina…"
         />
-      </div>
+      </section>
 
-      <div className="plein-edit__field">
-        <h3 className="plein-edit__programma-title">Programma</h3>
+      <section className="invoice-form__section">
+        <h2>Programma</h2>
+        <p className="facturen-panel__intro plein-edit__section-intro">Per dag inschakelen en tijden + acts invullen.</p>
         {([PROGRAMMA_DATUM_26, PROGRAMMA_DATUM_27] as const).map((datum) => (
           <fieldset key={datum} className="plein-edit__programma-datum">
             <legend className="plein-edit__programma-legend">
@@ -241,24 +251,27 @@ export default function PleinEditForm({ pleinSlug, pleinName, initial }: Props) 
                     <button
                       type="button"
                       onClick={() => removeProgrammaRow(datum, index)}
-                      className="plein-edit__programma-remove"
+                      className="facturen-btn facturen-btn--ghost facturen-btn--tiny plein-edit__programma-remove"
                       disabled={(programData[datum]?.items?.length ?? 0) <= 1}
                     >
                       Verwijder
                     </button>
                   </div>
                 ))}
-                <button type="button" onClick={() => addProgrammaRow(datum)} className="plein-edit__programma-add">
+                <button type="button" onClick={() => addProgrammaRow(datum)} className="facturen-btn facturen-btn--ghost facturen-btn--tiny plein-edit__programma-add">
                   + Rij toevoegen
                 </button>
               </div>
             )}
           </fieldset>
         ))}
-      </div>
+      </section>
 
-      <div className="plein-edit__field">
-        <label>Afbeeldingen (max. {MAX_IMAGES})</label>
+      <section className="invoice-form__section">
+        <h2>Afbeeldingen</h2>
+        <p className="facturen-panel__intro plein-edit__section-intro">
+          Maximaal {MAX_IMAGES} afbeeldingen. Volgorde kun je met de pijlen aanpassen; wijzigingen worden na opslaan zichtbaar op de site.
+        </p>
         <div className="plein-edit__images">
           {imageSlots.map((slot, i) => (
             <div key={i} className="plein-edit__image-slot">
@@ -285,7 +298,7 @@ export default function PleinEditForm({ pleinSlug, pleinName, initial }: Props) 
                 <button
                   type="button"
                   onClick={() => swapImageSlots(i, i - 1)}
-                  className="plein-edit__image-btn"
+                  className="facturen-btn facturen-btn--ghost facturen-btn--tiny plein-edit__image-btn"
                   disabled={i === 0}
                   title="Wissel met vorige"
                 >
@@ -294,7 +307,7 @@ export default function PleinEditForm({ pleinSlug, pleinName, initial }: Props) 
                 <button
                   type="button"
                   onClick={() => swapImageSlots(i, i + 1)}
-                  className="plein-edit__image-btn"
+                  className="facturen-btn facturen-btn--ghost facturen-btn--tiny plein-edit__image-btn"
                   disabled={i === imageSlots.length - 1}
                   title="Wissel met volgende"
                 >
@@ -303,7 +316,7 @@ export default function PleinEditForm({ pleinSlug, pleinName, initial }: Props) 
                 <button
                   type="button"
                   onClick={() => removeImageSlot(i)}
-                  className="plein-edit__image-btn plein-edit__image-btn--remove"
+                  className="facturen-btn facturen-btn--danger facturen-btn--tiny plein-edit__image-btn plein-edit__image-btn--remove"
                   title="Verwijderen (ook van server na opslaan)"
                 >
                   Verwijder
@@ -313,15 +326,17 @@ export default function PleinEditForm({ pleinSlug, pleinName, initial }: Props) 
           ))}
         </div>
         {imageSlots.length < MAX_IMAGES && (
-          <button type="button" onClick={addImageSlot} className="plein-edit__programma-add">
+          <button type="button" onClick={addImageSlot} className="facturen-btn facturen-btn--ghost facturen-btn--tiny plein-edit__programma-add">
             + Afbeelding toevoegen
           </button>
         )}
-      </div>
+      </section>
 
-      <button type="submit" className="plein-edit__submit" disabled={saving}>
-        {saving ? "Opslaan…" : "Opslaan"}
-      </button>
+      <div className="invoice-form__footer plein-edit__footer">
+        <button type="submit" className="facturen-btn facturen-btn--primary plein-edit__submit" disabled={saving}>
+          {saving ? "Opslaan…" : "Opslaan"}
+        </button>
+      </div>
     </form>
   );
 }
