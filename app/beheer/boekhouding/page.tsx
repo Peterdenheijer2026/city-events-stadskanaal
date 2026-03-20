@@ -107,9 +107,8 @@ export default async function BoekhoudingPage() {
                   <span className="boekhoud-kpi__sub">
                     Inkoop / voorbelasting: <strong>{eur(summary.btwInkoopYtd)}</strong>
                   </span>
-                  <span className="boekhoud-kpi__hint">
-                    Saldo (≈ bij te betalen): <strong className="boekhoud-kpi__hint-strong">{eur(summary.btwSaldoIndicatief)}</strong>
-                    — geen fiscaal advies; controleer bij je accountant.
+                  <span className="boekhoud-kpi__sub">
+                    Saldo: <strong>{eur(summary.btwSaldoIndicatief)}</strong>
                   </span>
                 </div>
               </div>

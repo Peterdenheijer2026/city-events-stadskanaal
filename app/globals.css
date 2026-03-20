@@ -2248,11 +2248,6 @@ ul {
   }
 }
 
-.boekhoud-kpi__hint-strong {
-  color: rgba(255, 255, 255, 0.92);
-  font-variant-numeric: tabular-nums;
-}
-
 .boekhoud-kpi__label {
   font-size: 0.68rem;
   font-weight: 700;
