@@ -339,8 +339,8 @@ export default function InvoiceForm({ customers }: Props) {
               ))}
             </select>
           </label>
-          <label>
-            Naam
+          <label className="invoice-form__span2">
+            (bedrijfs)naam
             <input
               value={customer.name}
               onChange={(e) => patchCustomer({ name: e.target.value })}
