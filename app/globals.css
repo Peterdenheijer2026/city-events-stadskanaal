@@ -1248,6 +1248,7 @@ ul {
 }
 
 .invoice-form__grid input,
+.invoice-form__grid select,
 .invoice-form__grid textarea {
   width: 100%;
   padding: 0.6rem 0.7rem;

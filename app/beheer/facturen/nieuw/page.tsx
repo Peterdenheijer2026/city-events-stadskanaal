@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { FinancienNav } from "@/app/components/FinancienNav";
 import { redirect } from "next/navigation";
 import InvoiceForm from "./InvoiceForm";
+import { listInvoiceCustomers } from "../actions";
 
 const TREASURER_EMAIL = "penningmeester@cityeventsstadskanaal.nl";
 
@@ -14,6 +15,7 @@ async function assertTreasurer() {
 
 export default async function NieuweFactuurPage() {
   await assertTreasurer();
+  const customers = await listInvoiceCustomers();
 
   return (
     <div className="beheer-page beheer-page--facturen">
@@ -28,7 +30,7 @@ export default async function NieuweFactuurPage() {
         </header>
 
         <main className="facturen-app__main">
-          <InvoiceForm />
+          <InvoiceForm customers={customers} />
         </main>
       </div>
     </div>

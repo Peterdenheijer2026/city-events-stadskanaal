@@ -27,6 +27,7 @@ export type InvoiceDraft = {
   subject: string;
   notes: string;
   customer: {
+    id?: string | null;
     name: string;
     /** Optioneel: alleen voor aanhef in e-mail; anders wordt betaler-naam gebruikt. */
     recipientName?: string | null;
@@ -39,6 +40,19 @@ export type InvoiceDraft = {
     country: string;
   };
   lines: InvoiceLineDraft[];
+};
+
+export type InvoiceCustomerListItem = {
+  id: string;
+  name: string;
+  recipient_name: string | null;
+  email: string | null;
+  postcode: string | null;
+  house_number: string | null;
+  house_number_addition: string | null;
+  street: string | null;
+  city: string | null;
+  country: string | null;
 };
 
 function round2(n: number) {
@@ -100,29 +114,43 @@ export async function createInvoice(draft: InvoiceDraft): Promise<{ id: string |
     const recipientRaw = (draft.customer.recipientName ?? "").trim();
     const recipientName = recipientRaw || null;
 
-    const { data: customerRow, error: custErr } = await supabase
-      .from("invoice_customers")
-      .insert({
-        name: draft.customer.name.trim(),
-        recipient_name: recipientName,
-        email: customerEmail,
-        postcode: draft.customer.postcode?.trim() || null,
-        house_number: draft.customer.houseNumber?.trim() || null,
-        house_number_addition: draft.customer.houseNumberAddition?.trim() || null,
-        street: draft.customer.street?.trim() || null,
-        city: draft.customer.city?.trim() || null,
-        country: (draft.customer.country?.trim() || "NL").toUpperCase(),
-      })
-      .select("id")
-      .single();
-    if (custErr) return { id: null, error: custErr.message };
+    let customerId: string | null = null;
+    const selectedCustomerId = (draft.customer.id ?? "").trim();
+
+    if (selectedCustomerId) {
+      const { data: existingCustomer, error: existingErr } = await supabase
+        .from("invoice_customers")
+        .select("id")
+        .eq("id", selectedCustomerId)
+        .single();
+      if (existingErr || !existingCustomer) return { id: null, error: "Geselecteerde klant bestaat niet meer." };
+      customerId = existingCustomer.id;
+    } else {
+      const { data: customerRow, error: custErr } = await supabase
+        .from("invoice_customers")
+        .insert({
+          name: draft.customer.name.trim(),
+          recipient_name: recipientName,
+          email: customerEmail,
+          postcode: draft.customer.postcode?.trim() || null,
+          house_number: draft.customer.houseNumber?.trim() || null,
+          house_number_addition: draft.customer.houseNumberAddition?.trim() || null,
+          street: draft.customer.street?.trim() || null,
+          city: draft.customer.city?.trim() || null,
+          country: (draft.customer.country?.trim() || "NL").toUpperCase(),
+        })
+        .select("id")
+        .single();
+      if (custErr) return { id: null, error: custErr.message };
+      customerId = customerRow.id;
+    }
 
     const { data: invoiceRow, error: invErr } = await supabase
       .from("invoices")
       .insert({
         invoice_number: invoiceNumber,
         invoice_date: draft.invoiceDate,
-        customer_id: customerRow.id,
+        customer_id: customerId,
         subject: draft.subject?.trim() || null,
         notes: draft.notes?.trim() || null,
         created_by: user.id,
@@ -172,6 +200,17 @@ export async function createInvoice(draft: InvoiceDraft): Promise<{ id: string |
   } catch (e) {
     return { id: null, error: e instanceof Error ? e.message : "Opslaan mislukt." };
   }
+}
+
+export async function listInvoiceCustomers(): Promise<InvoiceCustomerListItem[]> {
+  const { supabase } = await assertTreasurer();
+  const { data, error } = await supabase
+    .from("invoice_customers")
+    .select("id, name, recipient_name, email, postcode, house_number, house_number_addition, street, city, country")
+    .order("name", { ascending: true })
+    .limit(500);
+  if (error) throw error;
+  return (data ?? []) as InvoiceCustomerListItem[];
 }
 
 export async function listInvoices(): Promise<

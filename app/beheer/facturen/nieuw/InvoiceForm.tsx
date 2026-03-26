@@ -2,6 +2,7 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { createInvoice } from "../actions";
+import type { InvoiceCustomerListItem } from "../actions";
 
 type VatRate = 0 | 0.09 | 0.21;
 
@@ -16,6 +17,7 @@ type Line = {
 };
 
 type Customer = {
+  id?: string | null;
   name: string;
   /** Aanhef in factuur-e-mail; leeg = gebruik naam betaler. */
   recipientName: string;
@@ -26,6 +28,10 @@ type Customer = {
   street: string;
   city: string;
   country: string;
+};
+
+type Props = {
+  customers: InvoiceCustomerListItem[];
 };
 
 function uid() {
@@ -57,13 +63,14 @@ function calcFromIncl(incl: number, rate: VatRate) {
   return { excl: round2(excl), incl: round2(incl), vat: round2(vat) };
 }
 
-export default function InvoiceForm() {
+export default function InvoiceForm({ customers }: Props) {
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [addressLookupError, setAddressLookupError] = useState<string | null>(null);
   const [addressLookupPending, setAddressLookupPending] = useState(false);
   const [manualAddress, setManualAddress] = useState(false);
   const [customer, setCustomer] = useState<Customer>({
+    id: null,
     name: "",
     recipientName: "",
     email: "",
@@ -74,6 +81,7 @@ export default function InvoiceForm() {
     city: "",
     country: "NL",
   });
+  const [selectedCustomerId, setSelectedCustomerId] = useState("");
 
   const [subject, setSubject] = useState("");
   const [notes, setNotes] = useState("");
@@ -96,6 +104,11 @@ export default function InvoiceForm() {
       lastEdited: "excl",
     },
   ]);
+
+  function patchCustomer(patch: Partial<Customer>) {
+    setSelectedCustomerId("");
+    setCustomer((c) => ({ ...c, id: null, ...patch }));
+  }
 
   const computed = useMemo(() => {
     let totalExcl = 0;
@@ -243,6 +256,30 @@ export default function InvoiceForm() {
     });
   }
 
+  function selectExistingCustomer(id: string) {
+    setSelectedCustomerId(id);
+    if (!id) {
+      setCustomer((c) => ({ ...c, id: null }));
+      return;
+    }
+    const picked = customers.find((c) => c.id === id);
+    if (!picked) return;
+    setCustomer({
+      id: picked.id,
+      name: picked.name ?? "",
+      recipientName: picked.recipient_name ?? "",
+      email: picked.email ?? "",
+      postcode: picked.postcode ?? "",
+      houseNumber: picked.house_number ?? "",
+      houseNumberAddition: picked.house_number_addition ?? "",
+      street: picked.street ?? "",
+      city: picked.city ?? "",
+      country: picked.country ?? "NL",
+    });
+    setManualAddress(false);
+    setAddressLookupError(null);
+  }
+
   async function lookupAddress() {
     setAddressLookupError(null);
     const pc = customer.postcode.replace(/\s+/g, "").toUpperCase();
@@ -289,11 +326,24 @@ export default function InvoiceForm() {
       <section className="invoice-form__section">
         <h2>Betaler</h2>
         <div className="invoice-form__grid">
+          <label className="invoice-form__span2">
+            Bestaande klant kiezen
+            <select value={selectedCustomerId} onChange={(e) => selectExistingCustomer(e.target.value)}>
+              <option value="">-- Nieuwe klant invoeren --</option>
+              {customers.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.name}
+                  {c.city ? ` (${c.city})` : ""}
+                  {c.email ? ` - ${c.email}` : ""}
+                </option>
+              ))}
+            </select>
+          </label>
           <label>
             Naam
             <input
               value={customer.name}
-              onChange={(e) => setCustomer((c) => ({ ...c, name: e.target.value }))}
+              onChange={(e) => patchCustomer({ name: e.target.value })}
               required
             />
           </label>
@@ -303,7 +353,7 @@ export default function InvoiceForm() {
               type="email"
               autoComplete="email"
               value={customer.email}
-              onChange={(e) => setCustomer((c) => ({ ...c, email: e.target.value }))}
+              onChange={(e) => patchCustomer({ email: e.target.value })}
               placeholder="optioneel, bijv. sponsor@bedrijf.nl"
             />
           </label>
@@ -311,7 +361,7 @@ export default function InvoiceForm() {
             Naam ontvanger (voor aanhef in e-mail)
             <input
               value={customer.recipientName}
-              onChange={(e) => setCustomer((c) => ({ ...c, recipientName: e.target.value }))}
+              onChange={(e) => patchCustomer({ recipientName: e.target.value })}
               placeholder="bijv. Jan Jansen of Bedrijfsnaam BV — leeg = naam betaler hierboven"
             />
           </label>
@@ -319,7 +369,7 @@ export default function InvoiceForm() {
             Postcode
             <input
               value={customer.postcode}
-              onChange={(e) => setCustomer((c) => ({ ...c, postcode: e.target.value.toUpperCase() }))}
+              onChange={(e) => patchCustomer({ postcode: e.target.value.toUpperCase() })}
               onBlur={lookupAddress}
               placeholder="1234AB"
               inputMode="text"
@@ -329,7 +379,7 @@ export default function InvoiceForm() {
             Huisnr
             <input
               value={customer.houseNumber}
-              onChange={(e) => setCustomer((c) => ({ ...c, houseNumber: e.target.value }))}
+              onChange={(e) => patchCustomer({ houseNumber: e.target.value })}
               onBlur={lookupAddress}
               inputMode="numeric"
               placeholder="12"
@@ -339,7 +389,7 @@ export default function InvoiceForm() {
             Toevoeging
             <input
               value={customer.houseNumberAddition}
-              onChange={(e) => setCustomer((c) => ({ ...c, houseNumberAddition: e.target.value }))}
+              onChange={(e) => patchCustomer({ houseNumberAddition: e.target.value })}
               placeholder="A"
             />
           </label>
@@ -347,7 +397,7 @@ export default function InvoiceForm() {
             Straat
             <input
               value={customer.street}
-              onChange={(e) => setCustomer((c) => ({ ...c, street: e.target.value }))}
+              onChange={(e) => patchCustomer({ street: e.target.value })}
               placeholder="Straatnaam"
               readOnly={!manualAddress}
             />
@@ -356,7 +406,7 @@ export default function InvoiceForm() {
             Plaats
             <input
               value={customer.city}
-              onChange={(e) => setCustomer((c) => ({ ...c, city: e.target.value }))}
+              onChange={(e) => patchCustomer({ city: e.target.value })}
               placeholder="Stadskanaal"
               readOnly={!manualAddress}
             />
@@ -365,7 +415,7 @@ export default function InvoiceForm() {
             Land
             <input
               value={customer.country}
-              onChange={(e) => setCustomer((c) => ({ ...c, country: e.target.value.toUpperCase() }))}
+              onChange={(e) => patchCustomer({ country: e.target.value.toUpperCase() })}
               placeholder="NL"
             />
           </label>
