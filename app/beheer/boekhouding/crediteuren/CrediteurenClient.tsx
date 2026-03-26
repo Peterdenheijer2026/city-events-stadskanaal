@@ -32,7 +32,7 @@ export default function CrediteurenClient({ initialRows }: { initialRows: Purcha
   }
 
   function RowTable({ title, items, tone }: { title: string; items: PurchaseRow[]; tone: "open" | "paid" }) {
-    const countClass = tone === "paid" ? "facturen-section__count--paid" : "facturen-section__count--sent";
+    const countClass = tone === "paid" ? "facturen-section__count--paid" : "facturen-section__count--unsent";
     return (
       <section className="facturen-section">
         <div className="facturen-section__head">
