@@ -48,11 +48,16 @@ export default function HomePage() {
               <span className="hero__location-year">2026</span>
             </p>
             <div className="hero__buttons">
-              <Link href="#info" className="btn btn--primary">
-                City Events
-              </Link>
-              <Link href="#plattegrond" className="btn btn--secondary">
-                Plattegrond
+              <div className="hero__buttons-row">
+                <Link href="#info" className="btn btn--primary">
+                  City Events
+                </Link>
+                <Link href="#plattegrond" className="btn btn--secondary">
+                  Plattegrond
+                </Link>
+              </div>
+              <Link href="/knoalsternacht-dienstregeling" className="btn btn--tertiary">
+                Knoalsternacht dienstregeling
               </Link>
             </div>
           </div>
