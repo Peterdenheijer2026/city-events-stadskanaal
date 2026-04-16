@@ -49,6 +49,13 @@ export default async function FactuurDetailPage({
     invoice.paid_at != null ? "Betaald" : invoice.sent_at != null ? "Openstaand" : "Onverstuurd";
   const statusTone = invoice.paid_at != null ? "paid" : invoice.sent_at != null ? "sent" : "unsent";
   const emailConfigured = isInvoiceEmailConfigured();
+  const reminderEligible = (() => {
+    if (!invoice.sent_at || invoice.paid_at) return false;
+    const sent = new Date(invoice.sent_at);
+    if (Number.isNaN(sent.getTime())) return false;
+    const days = Math.floor((Date.now() - sent.getTime()) / (1000 * 60 * 60 * 24));
+    return days >= 14;
+  })();
 
   return (
     <div className="beheer-page beheer-page--facturen">
@@ -71,6 +78,16 @@ export default async function FactuurDetailPage({
             >
               PDF downloaden
             </a>
+            {reminderEligible && (
+              <a
+                href={`/beheer/facturen/${id}/herinnering.pdf`}
+                target="_blank"
+                rel="noreferrer"
+                className="facturen-btn facturen-btn--ghost"
+              >
+                Herinnering PDF
+              </a>
+            )}
             <DeleteInvoiceButton id={id} />
           </FinancienNav>
         </header>

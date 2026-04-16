@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { sendInvoiceByEmail, sendInvoiceReminderByEmail, setInvoicePaid, setInvoiceSent } from "./actions";
+import { sendInvoiceByEmail, setInvoicePaid, setInvoiceSent } from "./actions";
 
 type Row = {
   id: string;
@@ -154,38 +154,6 @@ export default function InvoiceListClient({
                           />
                           <span className="facturen-table__muted">{fmtDateTime(r.paid_at)}</span>
                         </label>
-                        {overdue && (
-                          <div className="facturen-table__remind">
-                            <a
-                              href={`/beheer/facturen/${r.id}/herinnering.pdf`}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="facturen-table__link facturen-table__link--small"
-                            >
-                              Herinnering PDF
-                            </a>
-                            {r.customer_email && emailConfigured ? (
-                              <>
-                                {" · "}
-                                <button
-                                  type="button"
-                                  className="facturen-btn facturen-btn--ghost facturen-btn--tiny"
-                                  disabled={pending}
-                                  onClick={() => {
-                                    setError(null);
-                                    startTransition(async () => {
-                                      const res = await sendInvoiceReminderByEmail(r.id);
-                                      if (res.error) setError(res.error);
-                                      else router.refresh();
-                                    });
-                                  }}
-                                >
-                                  Herinnering mailen
-                                </button>
-                              </>
-                            ) : null}
-                          </div>
-                        )}
                       </td>
                     </tr>
                   );
