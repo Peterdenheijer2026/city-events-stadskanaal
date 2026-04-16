@@ -121,6 +121,7 @@ export default async function FactuurDetailPage({
             initialEmail={customer.email}
             initialRecipientName={customer.recipient_name}
             sentAt={invoice.sent_at}
+            paidAt={invoice.paid_at}
             emailConfigured={emailConfigured}
           />
 

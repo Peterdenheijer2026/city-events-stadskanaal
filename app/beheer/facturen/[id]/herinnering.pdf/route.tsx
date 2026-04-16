@@ -1,225 +1,10 @@
-import { Document, Image, Page, StyleSheet, Text, View, pdf } from "@react-pdf/renderer";
 import { createClient } from "@/lib/supabase/server";
-import type { Readable } from "node:stream";
+import { buildReminderPdfBuffer, type ReminderPdfData } from "@/lib/reminder-pdf";
 
 export const runtime = "nodejs";
 
 const TREASURER_EMAIL = "penningmeester@cityeventsstadskanaal.nl";
 
-const STICHTING = {
-  name: "Stichting City Events Stadskanaal",
-  addressLines: ["Navolaan 7", "9501 CX Stadskanaal"],
-  kvk: "01147116",
-  btw: "NL820526861B01",
-  iban: "NL45 RABO 0122 8828 22",
-  paymentTermDays: 14,
-};
-
-function formatDate(d: string) {
-  const [y, m, day] = d.split("-");
-  if (!y || !m || !day) return d;
-  return `${day}-${m}-${y}`;
-}
-
-function addDays(dateStr: string, days: number) {
-  const d = new Date(`${dateStr}T00:00:00`);
-  if (Number.isNaN(d.getTime())) return null;
-  d.setDate(d.getDate() + days);
-  return d;
-}
-
-function eur(n: number) {
-  return n.toLocaleString("nl-NL", { style: "currency", currency: "EUR" });
-}
-
-async function toUint8Array(body: unknown): Promise<Uint8Array> {
-  if (!body) return new Uint8Array();
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const anyBody = body as any;
-  if (typeof anyBody?.byteLength === "number" && typeof anyBody?.slice === "function" && typeof anyBody?.toString === "function") {
-    return new Uint8Array(anyBody);
-  }
-
-  if (body instanceof ArrayBuffer) return new Uint8Array(body);
-  if (ArrayBuffer.isView(body)) return new Uint8Array(body.buffer);
-
-  if (typeof anyBody?.on === "function" && typeof anyBody?.pipe === "function") {
-    const stream = anyBody as Readable;
-    const chunks: Uint8Array[] = [];
-    let total = 0;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    for await (const chunk of stream as any) {
-      const u8 = chunk instanceof Uint8Array ? chunk : new Uint8Array(chunk);
-      chunks.push(u8);
-      total += u8.byteLength;
-    }
-    const out = new Uint8Array(total);
-    let offset = 0;
-    for (const c of chunks) {
-      out.set(c, offset);
-      offset += c.byteLength;
-    }
-    return out;
-  }
-
-  if (typeof ReadableStream !== "undefined" && body instanceof ReadableStream) {
-    const reader = body.getReader();
-    const chunks: Uint8Array[] = [];
-    let total = 0;
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      if (value) {
-        const u8 = value instanceof Uint8Array ? value : new Uint8Array(value);
-        chunks.push(u8);
-        total += u8.byteLength;
-      }
-    }
-    const out = new Uint8Array(total);
-    let offset = 0;
-    for (const c of chunks) {
-      out.set(c, offset);
-      offset += c.byteLength;
-    }
-    return out;
-  }
-
-  throw new Error("PDF output format not supported.");
-}
-
-const styles = StyleSheet.create({
-  page: { padding: 36, fontSize: 11, fontFamily: "Helvetica", color: "#111" },
-  header: { flexDirection: "row", justifyContent: "space-between", marginBottom: 18 },
-  headerLeft: { maxWidth: "60%", alignItems: "flex-start" },
-  title: { fontSize: 18, fontWeight: 700, marginBottom: 6 },
-  small: { fontSize: 10, color: "#444" },
-  logo: { width: 140, height: 46, objectFit: "contain", marginBottom: 8, alignSelf: "flex-start", marginLeft: -40 },
-  blockTitle: { fontSize: 12, fontWeight: 700, marginTop: 12, marginBottom: 6 },
-  table: { marginTop: 12, borderWidth: 1, borderColor: "#ddd" },
-  trHead: { flexDirection: "row", backgroundColor: "#f4f4f4", borderBottomWidth: 1, borderBottomColor: "#ddd" },
-  tr: { flexDirection: "row", borderBottomWidth: 1, borderBottomColor: "#eee" },
-  th: { padding: 8, fontWeight: 700 },
-  td: { padding: 8 },
-  c1: { width: "7%" },
-  c2: { width: "43%" },
-  c3: { width: "10%", textAlign: "right" },
-  c4: { width: "10%", textAlign: "right" },
-  c5: { width: "10%", textAlign: "right" },
-  c6: { width: "20%", textAlign: "right" },
-  totals: { marginTop: 14, alignSelf: "flex-end", width: "45%" },
-  totalRow: { flexDirection: "row", justifyContent: "space-between", paddingVertical: 3 },
-  totalGrand: { marginTop: 6, paddingTop: 6, borderTopWidth: 1, borderTopColor: "#ddd", fontWeight: 700 },
-  footer: { position: "absolute", bottom: 24, left: 36, right: 36, fontSize: 9, color: "#666" },
-});
-
-type InvoiceData = {
-  invoice: { id: string; invoice_number: string; invoice_date: string; subject: string | null; notes: string | null };
-  customer: { name: string; postcode: string | null; house_number: string | null; house_number_addition: string | null; street: string | null; city: string | null; country: string };
-  lines: { position: number; description: string; quantity: number; unit_price_excl: number; vat_rate: number }[];
-};
-
-function ReminderPdf({ data, logoUrl }: { data: InvoiceData; logoUrl: string }) {
-  const { invoice, customer, lines } = data;
-  const due = addDays(invoice.invoice_date, STICHTING.paymentTermDays);
-  const totals = lines.reduce(
-    (acc, l) => {
-      const excl = l.unit_price_excl * l.quantity;
-      const incl = excl * (1 + l.vat_rate);
-      acc.excl += excl;
-      acc.incl += incl;
-      acc.vat += incl - excl;
-      return acc;
-    },
-    { excl: 0, vat: 0, incl: 0 }
-  );
-
-  return (
-    <Document title={`Herinnering ${invoice.invoice_number}`}>
-      <Page size="A4" style={styles.page}>
-        <View style={styles.header}>
-          <View style={styles.headerLeft}>
-            <Image src={logoUrl} style={styles.logo} />
-            <Text style={styles.title}>Betalingsherinnering</Text>
-            <Text style={styles.small}>{STICHTING.name}</Text>
-            {STICHTING.addressLines.map((l) => (
-              <Text key={l} style={styles.small}>
-                {l}
-              </Text>
-            ))}
-          </View>
-          <View style={{ alignItems: "flex-end" }}>
-            <Text style={styles.small}>Factuurnummer: {invoice.invoice_number}</Text>
-            <Text style={styles.small}>Factuurdatum: {formatDate(invoice.invoice_date)}</Text>
-            <Text style={styles.small}>Betaaltermijn: {STICHTING.paymentTermDays} dagen</Text>
-            {due ? (
-              <Text style={styles.small}>
-                Vervaldatum: {due.toLocaleDateString("nl-NL", { day: "2-digit", month: "2-digit", year: "numeric" })}
-              </Text>
-            ) : null}
-          </View>
-        </View>
-
-        <Text>
-          Beste {customer.name},{"\n\n"}
-          Volgens onze administratie is onderstaande factuur nog niet voldaan. Wilt u het openstaande bedrag
-          binnen 7 dagen overmaken onder vermelding van het factuurnummer?
-        </Text>
-
-        <View style={styles.blockTitle}>
-          <Text>Overzicht</Text>
-        </View>
-
-        <View style={styles.table}>
-          <View style={styles.trHead}>
-            <Text style={[styles.th, styles.c1]}>#</Text>
-            <Text style={[styles.th, styles.c2]}>Omschrijving</Text>
-            <Text style={[styles.th, styles.c3]}>Aantal</Text>
-            <Text style={[styles.th, styles.c4]}>BTW</Text>
-            <Text style={[styles.th, styles.c5]}>Excl.</Text>
-            <Text style={[styles.th, styles.c6]}>Totaal incl.</Text>
-          </View>
-          {lines.map((l) => {
-            const excl = l.unit_price_excl * l.quantity;
-            const incl = excl * (1 + l.vat_rate);
-            return (
-              <View key={l.position} style={styles.tr}>
-                <Text style={[styles.td, styles.c1]}>{l.position}</Text>
-                <Text style={[styles.td, styles.c2]}>{l.description}</Text>
-                <Text style={[styles.td, styles.c3]}>{l.quantity}</Text>
-                <Text style={[styles.td, styles.c4]}>{Math.round(l.vat_rate * 100)}%</Text>
-                <Text style={[styles.td, styles.c5]}>{eur(excl)}</Text>
-                <Text style={[styles.td, styles.c6]}>{eur(incl)}</Text>
-              </View>
-            );
-          })}
-        </View>
-
-        <View style={styles.totals}>
-          <View style={styles.totalRow}>
-            <Text>Totaal excl.</Text>
-            <Text>{eur(totals.excl)}</Text>
-          </View>
-          <View style={styles.totalRow}>
-            <Text>BTW</Text>
-            <Text>{eur(totals.vat)}</Text>
-          </View>
-          <View style={[styles.totalRow, styles.totalGrand]}>
-            <Text>Totaal incl.</Text>
-            <Text>{eur(totals.incl)}</Text>
-          </View>
-        </View>
-
-        <Text style={styles.footer} fixed>
-          {STICHTING.name}
-          {STICHTING.kvk ? ` • KvK: ${STICHTING.kvk}` : ""}
-          {STICHTING.iban ? ` • IBAN: ${STICHTING.iban}` : ""}
-          {STICHTING.btw ? ` • BTW-id: ${STICHTING.btw}` : ""}
-        </Text>
-      </Page>
-    </Document>
-  );
-}
 
 export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }) {
   const { id } = await ctx.params;
@@ -262,7 +47,7 @@ export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }
     .order("position", { ascending: true });
   if (lineErr || !lines) return new Response("Not found", { status: 404 });
 
-  const data: InvoiceData = {
+  const data: ReminderPdfData = {
     invoice: {
       id: invoiceRow.id,
       invoice_number: invoiceRow.invoice_number,
@@ -274,9 +59,7 @@ export async function GET(req: Request, ctx: { params: Promise<{ id: string }> }
     lines: lines as any,
   };
 
-  const instance = pdf(<ReminderPdf data={data} logoUrl={logoUrl} />);
-  const raw = await instance.toBuffer();
-  const bytes = await toUint8Array(raw);
+  const bytes = await buildReminderPdfBuffer(data, logoUrl);
   const arrayBuffer = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer;
 
   return new Response(arrayBuffer, {

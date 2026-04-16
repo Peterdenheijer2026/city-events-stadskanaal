@@ -2,19 +2,21 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { sendInvoiceByEmail, updateInvoiceCustomerContact } from "../actions";
+import { sendInvoiceByEmail, sendInvoiceReminderByEmail, updateInvoiceCustomerContact } from "../actions";
 
 export default function InvoiceEmailPanel({
   invoiceId,
   initialEmail,
   initialRecipientName,
   sentAt,
+  paidAt,
   emailConfigured,
 }: {
   invoiceId: string;
   initialEmail: string | null;
   initialRecipientName: string | null;
   sentAt: string | null;
+  paidAt: string | null;
   emailConfigured: boolean;
 }) {
   const router = useRouter();
@@ -24,6 +26,14 @@ export default function InvoiceEmailPanel({
   const [pending, startTransition] = useTransition();
 
   const canSend = !sentAt && email.trim().length > 0 && emailConfigured;
+  const reminderEligible = (() => {
+    if (!sentAt || paidAt) return false;
+    const sent = new Date(sentAt);
+    if (Number.isNaN(sent.getTime())) return false;
+    const days = Math.floor((Date.now() - sent.getTime()) / (1000 * 60 * 60 * 24));
+    return days >= 14;
+  })();
+  const canSendReminder = reminderEligible && email.trim().length > 0 && emailConfigured;
 
   function saveEmail(e: React.FormEvent) {
     e.preventDefault();
@@ -45,6 +55,18 @@ export default function InvoiceEmailPanel({
     setError(null);
     startTransition(async () => {
       const res = await sendInvoiceByEmail(invoiceId);
+      if (res.error) {
+        setError(res.error);
+        return;
+      }
+      router.refresh();
+    });
+  }
+
+  function sendReminder() {
+    setError(null);
+    startTransition(async () => {
+      const res = await sendInvoiceReminderByEmail(invoiceId);
       if (res.error) {
         setError(res.error);
         return;
@@ -108,12 +130,20 @@ export default function InvoiceEmailPanel({
           >
             Factuur versturen
           </button>
+          <button
+            type="button"
+            className="facturen-btn facturen-btn--ghost"
+            disabled={pending || !canSendReminder}
+            onClick={sendReminder}
+          >
+            Herinnering versturen
+          </button>
         </div>
       </form>
       {sentAt && (
         <p className="facturen-table__muted" style={{ marginTop: "0.75rem" }}>
-          Deze factuur is al gemarkeerd als verstuurd ({new Date(sentAt).toLocaleString("nl-NL")}). Versturen opnieuw
-          is uitgeschakeld; gebruik anders PDF downloaden.
+          Deze factuur is al gemarkeerd als verstuurd ({new Date(sentAt).toLocaleString("nl-NL")}). De originele
+          factuurmail is uitgeschakeld; zodra de factuur 14 dagen openstaat kun je hierboven een herinnering mailen.
         </p>
       )}
     </section>

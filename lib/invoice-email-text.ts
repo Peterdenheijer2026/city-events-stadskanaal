@@ -44,3 +44,25 @@ export function buildInvoiceEmailBodyHtml(params: {
 <p>Met vriendelijke groet,</p>
 <p><strong>${ferdy}</strong><br/>Penningmeester<br/>${stichting}</p>`;
 }
+
+export function buildReminderEmailBodyHtml(params: {
+  invoiceNumber: string;
+  invoiceDate: string;
+  payerName: string;
+  recipientName: string | null;
+}): string {
+  const { invoiceNumber, invoiceDate, payerName, recipientName } = params;
+  const naam = escapeHtml(greetingNameForEmail(recipientName, payerName));
+  const num = escapeHtml(invoiceNumber);
+  const datum = escapeHtml(formatInvoiceDateNl(invoiceDate));
+  const stichting = escapeHtml(STICHTING.name);
+  const iban = escapeHtml(STICHTING.iban.replace(/\s+/g, " ").trim());
+  const ferdy = escapeHtml(PENNINGMEESTER_NAME);
+
+  return `<p>Geachte ${naam},</p>
+<p>Hierbij ontvangt u een <strong>betalingsherinnering</strong> voor factuur <strong>${num}</strong> van ${stichting} als PDF-bijlage.</p>
+<p>De factuur is uitgegeven op ${datum}. Volgens onze administratie staat het bedrag nog open. Wilt u het openstaande bedrag binnen 7 dagen overmaken op bankrekening <strong>${iban}</strong>, onder vermelding van het factuurnummer?</p>
+<p>Heeft u inmiddels betaald, dan kunt u deze herinnering als niet verzonden beschouwen. Heeft u vragen, neem dan gerust contact met ons op.</p>
+<p>Met vriendelijke groet,</p>
+<p><strong>${ferdy}</strong><br/>Penningmeester<br/>${stichting}</p>`;
+}

@@ -6,7 +6,8 @@ import { revalidatePath } from "next/cache";
 import { getAppOrigin } from "@/lib/app-origin";
 import { loadInvoicePdfData } from "@/lib/invoice-pdf-data";
 import { buildInvoicePdfBuffer, STICHTING } from "@/lib/invoice-pdf";
-import { buildInvoiceEmailBodyHtml } from "@/lib/invoice-email-text";
+import { buildInvoiceEmailBodyHtml, buildReminderEmailBodyHtml } from "@/lib/invoice-email-text";
+import { buildReminderPdfBuffer, type ReminderPdfData } from "@/lib/reminder-pdf";
 import { sendInvoiceEmail } from "@/lib/send-invoice-email";
 
 const TREASURER_EMAIL = "penningmeester@cityeventsstadskanaal.nl";
@@ -67,6 +68,14 @@ function calcExclFromIncl(incl: number, rate: VatRate) {
   if (rate === 0) return incl;
   // Bewaar een nauwkeurige exclusief-prijs; afronding doen we pas bij weergave.
   return incl / (1 + rate);
+}
+
+function reminderEligible(sentAt: string | null, paidAt: string | null) {
+  if (!sentAt || paidAt) return false;
+  const sent = new Date(sentAt);
+  if (Number.isNaN(sent.getTime())) return false;
+  const days = Math.floor((Date.now() - sent.getTime()) / (1000 * 60 * 60 * 24));
+  return days >= 14;
 }
 
 async function assertTreasurer() {
@@ -421,6 +430,55 @@ export async function sendInvoiceByEmail(invoiceId: string): Promise<{ error: st
       .update({ sent_at: new Date().toISOString() })
       .eq("id", invoiceId);
     if (upErr) return { error: upErr.message };
+
+    revalidatePath("/beheer/facturen");
+    revalidatePath(`/beheer/facturen/${invoiceId}`);
+    return { error: null };
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : "Versturen mislukt." };
+  }
+}
+
+export async function sendInvoiceReminderByEmail(invoiceId: string): Promise<{ error: string | null }> {
+  try {
+    const { supabase } = await assertTreasurer();
+
+    const data = await getInvoice(invoiceId);
+    if (!data) return { error: "Factuur niet gevonden." };
+    if (!reminderEligible(data.invoice.sent_at, data.invoice.paid_at)) {
+      return { error: "Deze factuur komt nog niet in aanmerking voor een herinnering." };
+    }
+
+    const to = data.customer.email?.trim();
+    if (!to) return { error: "Geen e-mailadres bij deze betaler. Vul eerst een e-mailadres in." };
+    if (!isValidEmail(to)) return { error: "Ongeldig e-mailadres bij deze betaler." };
+
+    const pdfData = await loadInvoicePdfData(supabase, invoiceId);
+    if (!pdfData) return { error: "Factuur niet gevonden." };
+
+    const reminderData: ReminderPdfData = pdfData;
+    const origin = getAppOrigin();
+    const logoUrl = `${origin}/assets/logo.png`;
+    const pdfBytes = await buildReminderPdfBuffer(reminderData, logoUrl);
+
+    const num = pdfData.invoice.invoice_number;
+    const recipientName = data.customer.recipient_name ?? null;
+    const html = buildReminderEmailBodyHtml({
+      invoiceNumber: num,
+      invoiceDate: pdfData.invoice.invoice_date,
+      payerName: data.customer.name,
+      recipientName,
+    });
+
+    const sent = await sendInvoiceEmail({
+      to,
+      subject: `Betalingsherinnering factuur ${num} – ${STICHTING.name}`,
+      html,
+      pdfFilename: `herinnering-${num}.pdf`,
+      pdfBytes,
+    });
+
+    if (!sent.ok) return { error: sent.error };
 
     revalidatePath("/beheer/facturen");
     revalidatePath(`/beheer/facturen/${invoiceId}`);
